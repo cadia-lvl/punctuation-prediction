@@ -1,10 +1,9 @@
-
 from wer_assist import apply_wer
 import sys
 
 wordList_wer = apply_wer(float(sys.argv[2]))
 sentences_wer = [" ".join(sentence) for sentence in wordList_wer]
 
-with open("wer/wer" + sys.argv[2] + ".txt", 'w', encoding='utf-8') as show_unurl:
+with open("wer/wer" + sys.argv[2] + ".txt", "w", encoding="utf-8") as show_unurl:
     for item in sentences_wer:
         show_unurl.write("%s\n" % item)
