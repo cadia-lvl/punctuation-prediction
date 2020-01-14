@@ -1,6 +1,8 @@
 # Copyright 2016 Ottokar Tilk and Tanel Alumäe
 # The following code is available on:
 # https://github.com/ottokart/punctuator2/blob/master/example/dont_run_me_run_the_other_script_instead.py
+# In it, functions are defined to exchange all punctuation marks in a dataset for 
+# descriptors of said punctuations.
 # coding: utf-8
 
 from __future__ import division, print_function
