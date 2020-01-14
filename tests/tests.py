@@ -1,4 +1,4 @@
-from process_text import process_line
+from ../process_text import process_line
 
 unprocessed_text = ['Snjóflóð féll nú fyrir skömmu úr Eyrarhlíð.',
 					'Lokar það veginum milli Ísafjarðar og Hnífsdals?',
