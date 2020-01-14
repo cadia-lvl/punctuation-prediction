@@ -1,3 +1,7 @@
+# Copyright 2020 Helga Svala Sigurðardóttir helgas@ru.is
+# In this file, unprocessed text is taken and processed
+# according to the methods in Punctuator 2 ©. 
+# It is split and saved to a train, test and validation files
 from process_text import process_line
 from sklearn.model_selection import train_test_split
 import sys
