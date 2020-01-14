@@ -1,3 +1,6 @@
+# Copyright 2020 Helga Svala Sigurðardóttir helgas@ru.is
+# In this script, the word error rate is introduced to data
+# and the data then saved to a file.
 from wer_assist import apply_wer
 import sys
 
