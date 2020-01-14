@@ -16,14 +16,24 @@ Klukkan fjögur verður svokölluð Fjallkonuhátíð, garðveisla með ýmsum u
 ```
 Run:
 ``` mkdir datadir workdir
-python {text file to process} {train file split} {test file split}
+python write_to_file.py {text file to process} {train file split} {test file split}
 ```
 
 The default is 80% train, 10% test and 10% evaluation (50% split between the 20% remains of the data):
-```python test_to_process.txt 0.2 0.5
+```
+python write_to_file.py text_to_process.txt 0.2 0.5
 ```
 
-This writes a file with processed_text, split in the data directory
+This writes a file with processed_text, split in the data directory and unsplit in the working directory. Punctuator 2 (https://github.com/ottokart/punctuator2) can now be applied to the files.
 
+To introduce a word error rate in the data, run:
+```
+python introduce_wer.py {processed_text} {word error rate}
+```
+The function splits the WER to 25% insertions, 25% deletions and 50% substitutions. For 20% word error rate, run:
+```
+python introduce_wer.py workdir/processed_text.all.txt 0.2
+```
+The file in the `wer`-directory can be used as a `.dev`-file in punctuator 2, to run `error_calculator.py` against a pretrained model.
 
 
