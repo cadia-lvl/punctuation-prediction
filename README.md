@@ -8,14 +8,16 @@ To run it:
 
 Start with a file with a list of strings, e.g, `text_to_process.txt`:
 
-```Verð á olíu á Asíumörkuðum lækkaði í nótt eftir tilkynningu Sádi Araba.
+```
+Verð á olíu á Asíumörkuðum lækkaði í nótt eftir tilkynningu Sádi Araba.
 Það hlýtur að hafa verið eins blaut tuska í andlitið.
 Kuldatölurnar sýna tuttugu og þriggja stiga frost í Reykjavík klukkan sex á jóladag.
 Á miðnætti var hefðbundin flugeldasýning.
 Klukkan fjögur verður svokölluð Fjallkonuhátíð, garðveisla með ýmsum uppákomum.
 ```
 Run:
-``` mkdir datadir workdir
+``` 
+mkdir datadir workdir
 python write_to_file.py {text file to process} {train file split} {test file split}
 ```
 
