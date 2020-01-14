@@ -27,11 +27,6 @@ multiple_punct = re.compile(r"([\.\?\!\,\:\;\-])(?:[\.\?\!\,\:\;\-]){1,}")
 
 is_number = lambda x: len(numbers.sub("", x)) / len(x) < 0.6
 
-
-def untokenize(line):
-    return line.replace(" ruv ", "")
-
-
 def process_line(line):
 
     tokens = word_tokenize(line)
