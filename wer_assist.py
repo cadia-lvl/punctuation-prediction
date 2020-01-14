@@ -1,3 +1,10 @@
+# Copyright 2020 Helga Svala Sigurðardóttir helgas@ru.is
+# In this file, a helper function to introduce word error 
+# rates to a dataset is defined.
+# A list of sentences is split up to words, punctuation
+# marks removed and a function defined to introduce
+# word error rate with 25% deletion, 25% insertion and 
+# 50% substitution.
 import sys
 import random
 import numpy as np
