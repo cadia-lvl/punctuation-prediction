@@ -1,4 +1,4 @@
-# punctuation-detection
+# Punctuation detection in Icelandic
 
 Support tools for punctuation and boundary detection for ASR output.
 
