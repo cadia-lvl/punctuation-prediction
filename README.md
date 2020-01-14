@@ -6,7 +6,7 @@ As of January 13th 2020, the code is available for putting in punctuations and i
 
 To run it:
 
-Start with a file with a list of strings, e.g, `text_to_process.txt:
+Start with a file with a list of strings, e.g, `text_to_process.txt`:
 
 ```Verð á olíu á Asíumörkuðum lækkaði í nótt eftir tilkynningu Sádi Araba.
 Það hlýtur að hafa verið eins blaut tuska í andlitið.
