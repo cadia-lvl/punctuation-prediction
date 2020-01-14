@@ -15,7 +15,7 @@ Kuldatölurnar sýna tuttugu og þriggja stiga frost í Reykjavík klukkan sex �
 Klukkan fjögur verður svokölluð Fjallkonuhátíð, garðveisla með ýmsum uppákomum.
 ```
 Run:
-``` mkdir datadir
+``` mkdir datadir workdir
 python {text file to process} {train file split} {test file split}
 ```
 
