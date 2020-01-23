@@ -1,3 +1,4 @@
+# coding = utf-8
 # Copyright 2020 Helga Svala Sigurðardóttir helgas@ru.is
 # In this file, unprocessed text is taken and processed
 # according to the methods in Punctuator 2 ©. 
@@ -21,26 +22,33 @@ except ValueError:
 if not isinstance(file_string[0], str):
     print("The input text needs to be a list of strings")
     sys.exit(0)
-
+   
 print(f"Number of rows in file: {len(file_string)}")
 
 # Punctuation marks processed
 processed_text = [process_line(elem) for elem in file_string]
-
-# Save processed_text to file
-with open("workdir/processed_text.all.txt", "w", encoding="utf-8") as all_file:
-    for item in processed_text:
-        all_file.write("%s\n" % item)
-
 print("Done processing the text")
+    
+try:
+    if len(sys.argv) > 2:
+        float(sys.argv[2])
+        print("There is no specified directory to save the text to")
+        sys.exit(0)
+except ValueError:
+    # Save processed_text to file
+    with open("sys.argv[2]" + /processed_text.all.txt", "w", encoding="utf-8") as all_file:
+        for item in processed_text:
+            all_file.write("%s\n" % item)
+      
+print("Done writing text to file")
 
 # Write it to train, dev, and test files.
 if len(sys.argv) > 3:
     train_text, tmp_text = train_test_split(
-        processed_text, test_size=float(sys.argv[2]), random_state=42
+        processed_text, test_size=float(sys.argv[3]), random_state=42
     )
     dev_text, test_text = train_test_split(
-        tmp_text, test_size=float(sys.argv[3]), random_state=42
+        tmp_text, test_size=float(sys.argv[4]), random_state=42
     )
 else:
     train_text, tmp_text = train_test_split(
