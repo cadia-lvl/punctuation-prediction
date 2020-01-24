@@ -36,7 +36,7 @@ try:
         sys.exit(0)
 except ValueError:
     # Save processed_text to file
-    with open("sys.argv[2]" + /processed_text.all.txt", "w", encoding="utf-8") as all_file:
+    with open(sys.argv[2] + "/processed_text.all.txt", "w", encoding="utf-8") as all_file:
         for item in processed_text:
             all_file.write("%s\n" % item)
       
