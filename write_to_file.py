@@ -56,15 +56,15 @@ else:
     )
     dev_text, test_text = train_test_split(tmp_text, test_size=0.5, random_state=42)
 
-with open("datadir/processed_text.train.txt", "w", encoding="utf-8") as train_file:
+with open(sys.argv[2] + "/processed_text.train.txt", "w", encoding="utf-8") as train_file:
     for item in train_text:
         train_file.write("%s\n" % item)
 
-with open("datadir/processed_text.dev.txt", "w", encoding="utf-8") as dev_file:
+with open(sys.argv[2] + "/processed_text.dev.txt", "w", encoding="utf-8") as dev_file:
     for item in dev_text:
         dev_file.write("%s\n" % item)
 
-with open("datadir/processed_text.test.txt", "w", encoding="utf-8") as test_file:
+with open(sys.argv[2] + "/processed_text.test.txt", "w", encoding="utf-8") as test_file:
     for item in test_text:
         test_file.write("%s\n" % item)
 
