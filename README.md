@@ -17,13 +17,13 @@ Klukkan fjögur verður svokölluð Fjallkonuhátíð, garðveisla með ýmsum u
 ```
 Run:
 ``` 
-mkdir datadir workdir
-python write_to_file.py {text file to process} {train file split} {test file split}
+mkdir {data directory}
+python write_to_file.py {text file to process} {data directory} {train file split} {test file split}
 ```
 
 The default is 80% train, 10% test and 10% evaluation (50% split between the 20% remains of the data):
 ```
-python write_to_file.py text_to_process.txt 0.2 0.5
+python write_to_file.py text_to_process.txt datadir 0.2 0.5
 ```
 
 This writes a file with processed_text, split in the data directory and unsplit in the working directory. Punctuator 2 (https://github.com/ottokart/punctuator2) can now be applied to the files.
