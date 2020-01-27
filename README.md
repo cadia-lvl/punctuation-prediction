@@ -33,10 +33,8 @@ To introduce a word error rate in the data, run:
 mkdir {word error rate directory}
 python introduce_wer.py {processed_text} {word error rate directory} {word error rate}
 ```
-The function splits the WER to 25% insertions, 25% deletions and 50% substitutions. For 20% word error rate, run:
-```
-python introduce_wer.py {data directory}/processed_text.all.txt 0.2
-```
+The function splits the WER to 25% insertions, 25% deletions and 50% substitutions.
+
 The file in the `wer`-directory can be used as a `.dev`-file in punctuator 2, to run `error_calculator.py` against a pretrained model.
 
 
