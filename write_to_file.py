@@ -28,20 +28,7 @@ print(f"Number of rows in file: {len(file_string)}")
 # Punctuation marks processed
 processed_text = [process_line(elem) for elem in file_string]
 print("Done processing the text")
-    
-try:
-    if len(sys.argv) > 2:
-        float(sys.argv[2])
-        print("There is no specified directory to save the text to")
-        sys.exit(0)
-except ValueError:
-    # Save processed_text to file
-    with open(sys.argv[2] + "/processed_text.all.txt", "w", encoding="utf-8") as all_file:
-        for item in processed_text:
-            all_file.write("%s\n" % item)
-      
-print("Done writing text to file")
-
+  
 # Write it to train, dev, and test files.
 if len(sys.argv) > 3:
     train_text, tmp_text = train_test_split(
