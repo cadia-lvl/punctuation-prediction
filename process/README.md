@@ -6,12 +6,12 @@ As of January 13th 2020, the code is available for putting in punctuations and i
 
 To run it:
 
-Start with a file with a lower-cased (and preferably, for better results, somewhat normalized) list of strings, e.g, `text_to_process.txt`:
+Start with a file with a (preferably, for better results, somewhat normalized) list of strings, e.g, `text_to_process.txt`:
 
 ```
-like all the members who have just spoken, the commission therefore sincerely regrets the failure to extend the mandate of un troops in the former yugoslav republic of macedonia. 
-following the recognition of taiwan by the fyrom, china decided, as you know, to exercise its veto in the security council against the extension of the mandate of unpredep. 
-the presidency of the european union tried to get the authorities in peking and skopje to reach a consensus, but these attempts were unsuccessful. 
+Like all the members who have just spoken, the commission therefore sincerely regrets the failure to extend the mandate of un troops in the former Yugoslav Republic of Macedonia. 
+Following the recognition of Taiwan by the Fyrom, China decided, as you know, to exercise its veto in the security council against the extension of the mandate of unpredep. 
+The presidency of the European Union tried to get the authorities in Peking and Skopje to reach a consensus, but these attempts were unsuccessful. 
 ```
 
 Run:
