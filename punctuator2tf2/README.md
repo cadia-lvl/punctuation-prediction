@@ -1,6 +1,6 @@
 ## Data
 
-After processing the text, and having files with `.train.txt`, `.dev.txt` and `.test.txt`, the next step is to create the vocabulary.
+After processing the text (./processdata), and having files with `.train.txt`, `.dev.txt` and `.test.txt`, the next step is to create the vocabulary.
 In `data.py`, define the path in line 13 as where you want your processed data to go.
 That folder consists of `dev`, `test`, `train`, `vocabulary` and `punctuations`.
 
