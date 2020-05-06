@@ -26,15 +26,16 @@ It's good to put hidden_layer_size = 256 and learning_rate = 0.02.
 
 To punctuate the data, using the trained model, the command is:
 
-``` cat <data>.dev.txt | python punctuator.py <model_path> <model_output_path> ```
+``` cat <data>.test.txt | python punctuator.py <model_path> <model_output_path> ```
 
-`<data>.dev.txt` is the file in the data folder which contains a portion of the data in the format:
+`<data>.test.txt` is the file in the data folder which contains a portion of the data in the format:
 
 ```mr president ,COMMA ladies and gentlemen ,COMMA in the past ,COMMA since <NUM> ,COMMA in fact ,COMMA un forces have played an important role in stabilising the balkans .PERIOD 
 like all the members who have just spoken ,COMMA the commission therefore sincerely regrets the failure to extend the mandate of un troops in the former yugoslav republic of macedonia .PERIOD 
 following the recognition of taiwan by the fyrom ,COMMA china decided ,COMMA as you know ,COMMA to exercise its veto in the security council against the extension of the mandate of unpredep .PERIOD 
 the presidency of the european union tried to get the authorities in peking and skopje to reach a consensus ,COMMA but these attempts were unsuccessful .PERIOD
 ```
+Note that the .dev file was used to validate the training, use the test file to punctuate.
 
 `<model_path>`is the path to the trained model `"Model_{model_name}_h{num_hidden}_lr{learning_rate}.pcl"`
 
