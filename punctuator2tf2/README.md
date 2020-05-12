@@ -1,7 +1,7 @@
 ## Data
 
 After processing the text (./process), and having files with `.train.txt`, `.dev.txt` and `.test.txt`, the next step is to create the vocabulary.
-In `data.py`, define the path in line 13 as where you want your processed data to go.
+In `data.py`, define the path in line 13 as where you want your processed data to go. *This path is important when running all files.*
 That folder consists of `dev`, `test`, `train`, `vocabulary` and `punctuations`.
 
 In lines 31-32, choose which punctuation marks you want your system to learn. We went with periods, commas and question marks.
