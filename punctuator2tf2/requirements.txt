@@ -67,7 +67,7 @@ setuptools==44.0.0
 six==1.13.0            
 sqlite==3.30.1          
 tensorboard==2.1.1           
-tensorflow==2.0.0             
+tensorflow>=2.0.1            
 tensorflow-base==2.0.0             
 tensorflow-estimator==2.1.0                
 tensorflow-gpu==2.0.0                  
