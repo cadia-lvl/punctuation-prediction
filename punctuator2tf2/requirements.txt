@@ -70,7 +70,7 @@ tensorboard==2.1.1
 tensorflow>=2.0.1            
 tensorflow-base==2.0.0             
 tensorflow-estimator==2.1.0                
-tensorflow-gpu==2.0.0                  
+tensorflow-gpu>=2.0.1                  
 termcolor==1.1.0                      
 tk==8.6.8                  
 tornado==6.0.3              
