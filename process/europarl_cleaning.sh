@@ -22,8 +22,8 @@ echo "Clean the data by removing and rewriting lines using sed regex"
 # 3. Remove remaining lines with (), [], {}
 # 4. Change en dash to a hyphen
 # 5. Remove hyphen after [;:,] and deal with multiple punctuation after words/numbers
-# 6. Remove symbols other than letters or numbers at line beginnings
-# 7. Remove lines which don't contain letters and change to one space between words.
+# 6. Remove symbols other than letters or numbers at line beginnings and remove " and ' (latter around puncts)
+# 7. Remove lines which don't contain letters, remove symbols listed in middle and change to one space between words.
 grep -v " '[^ ]" ../europarl-v7.en | \
 grep -v \'\ s\   | \
 grep -v \'\ ll\  | \
@@ -31,10 +31,10 @@ grep -v \'\ ve\  | \
 grep -v \'\ m\   | \
 sed -re 's:\(+[^)]*?\)+: :g' -e 's:\[[^]]*?\]: :g' \
 -e '/\[|\]|\{|\}|\(|\)/d' \
--e 's:–:-:g' \
+-e 's:–|--:-:g' \
 -e 's/([;:,]) -/\1/g' -e 's:([^ .,:;?!-]+) ([.,:;?! -]+)([.,:;?!-]):\1 \3:g' \
--e 's:^[^A-Za-z0-9]+::' \
--e '/^[^A-Za-z]*$/d' -e 's/ +/ /g' \
+-e 's:^[^A-Za-z0-9]+::' -e 's:"::g' \
+-e '/^[^A-Za-z]*$/d' -e 's/[^A-Za-z0-9 .,:;\?\!$#@%&°\x27\/-]/ /g' -e 's/ +/ /g' \
 > ep_cleaned.txt
 
 echo "Now the data can be formatted for training using preprocess.py"

@@ -2,7 +2,11 @@
 
 set -o pipefail
 
-# Run a hugging face ner transformer on a punctuation task
+# Run a hugging face ner transformer on a punctuation task as explained here:
+# https://github.com/huggingface/transformers/tree/master/examples/token-classification
+# The Icelandic Gigaword corpus data is obtained with ../process/rmh_subset_specific.ipynb
+# and cleaned with rmh_data_cleaning.sh
+# The English Europarl data is obtained and cleaned with ../process/europarl_cleaning.sh
 
 conda activate tf20env
 
@@ -27,7 +31,7 @@ else
 fi
 
 error_calc_dir=utils
-export SCRIPT_DIR=transformers/examples/ner
+export SCRIPT_DIR=/home/staff/inga/transformers/examples/ner #transformers/examples/ner
 export MAX_LENGTH=60
 export MAX_SEQ_LENGTH=180
 export BERT_MODEL=bert-base-multilingual-cased
@@ -45,20 +49,21 @@ echo "Get the data on the right format"
 # 1. Put one word (+ a possible punct) per line,
 # 2. add a space between the punct token and the word,
 # 3-7. Change the punct symbols from the punctuator 2 look and map puncts to periods, commas and question marks
-# 8. Remove troublesome unicode symbols and weird symbols (should be changed to remove everything except accepted symbols)
+# 8. Remove stuff stuck to the punct symbol, usually an apostrophe
 # 9. Keep only the first two columns (there can be more than one punctuation after a word)
 # 10. Remove lines containing only a label or empty
 # 11. Add O to empty slots in the 2nd column
 for i in train dev test; do
     (
-        sed -r 's: ([\.,\?\!\:\;\-][A-Z]{4,}):\1:g' $orig/${input}.${i}.txt | tr ' ' '\n' \
+        sed -re 's/[^A-Za-z0-9 .,:;\?\!$#@%&°\x27\/<>\-]/ /g' -e 's/ +/ /g' -e 's: ([\.,\?\!\:\;\-][A-Z]{4,}):\1:g' \
+        < $orig/${input}.${i}.txt | tr ' ' '\n' \
         | sed -re 's:([\.,\?\!\:\;\-][A-Z]{4,}): \1:g' \
         -e 's:\-DASH|\:COLON:COMMA:g' \
         -e 's:\;SEMICOLON|\!EXCLAMATIONMARK:PERIOD:g' \
         -e 's:,COMMA:COMMA:g' \
         -e 's:\?QUESTIONMARK:QUESTIONMARK:g' \
         -e 's:\.PERIOD:PERIOD:g' \
-        -e 's/\)xc2\xad|\xc2\x8d|\xc2\x90|\xc2\x93|\xc2\x9d|\x60|´|‟|‐|~|‑|‒|—|―|−|•|’|⋄|±|×||·|®|©||| //g' \
+        -e 's:(PERIOD|COMMA|QUESTIONMARK)[^ ]+:\1:g' \
         | cut -d' ' -f1,2 \
         | egrep -v '^ |^$' \
         | awk -F' ' '{if ($2 == "") print $1,"O"; else print $0}' \
@@ -104,7 +109,7 @@ python3 ${SCRIPT_DIR}/run_tf_ner.py \
 # Use the Punctuator2 F1-score calculator
 sed -re 's: O$::' -e 's:COMMA:,COMMA:' \
 -e 's:QUESTIONMARK:\?QUESTIONMARK:' \
--e 's:PERIOD:.PERIOD:'\
+-e 's:PERIOD:.PERIOD:' \
 < $OUTPUT_DIR/test_predictions.txt \
 | tr '\n' ' ' | sed -r 's: +: :g' \
 > $OUTPUT_DIR/test_predictions_theano_style.txt

@@ -2,15 +2,15 @@
 
 set -o pipefail
 
-# Make predictions using texts with differently hight WER
+# Make predictions using texts with differently hight inserted WER
 # Problematic! Can't run all at once. Need to rename each file to test.txt and put in $DATA_DIR
 # and afterwards rename the output and put in a different dir
 
 input=$1
 datadir=$2
 
-export DATA_DIR=$2
-export SCRIPT_DIR=transformers/examples/ner
+export DATA_DIR=$datadir
+export SCRIPT_DIR=transformers/examples/token-classification # NOTE: /home/staff/inga/transformers/examples/ner, gpu stuff updated on the other
 export MAX_LENGTH=60
 export MAX_SEQ_LENGTH=180
 export BERT_MODEL=bert-base-multilingual-cased
@@ -20,8 +20,8 @@ export NUM_EPOCHS=3
 export SAVE_STEPS=3000
 export SEED=42
 
-origwertestdir=/work/helgasvala/tfpunctuationmars/tfpunctuation/Samanburður2604/bigdata/wer_testfiles
 error_calc_dir=utils
+origwertestdir=/work/helgasvala/tfpunctuationmars/tfpunctuation/Samanburður2604/bigdata/wer_testfiles
 wertest=$DATA_DIR/wer_test
 wertestout=$OUTPUT_DIR/wer_test
 tmp=$wertest/tmp
@@ -31,13 +31,14 @@ conda activate tf20env
 
 for p in 5 10 15 20; do
     (
-        sed -r 's: ([\.,\?\!\:\;\-][A-Z]{4,}):\1:g' $origwertestdir/wer${p}perc.${input}.txt | tr ' ' '\n' \
+        sed -re 's/[^A-Za-z0-9 .,:;\?\!$#@%&°\x27\/<>\-]/ /g' -e 's/ +/ /g' -e 's: ([\.,\?\!\:\;\-][A-Z]{4,}):\1:g' \
+        < $origwertestdir/wer${p}perc.${input}.txt | tr ' ' '\n' \
         | sed -re 's:([\.,\?\!\:\;\-][A-Z]{4,}): \1:g' \
         -e 's:\-DASH|\:COLON:COMMA:g' \
         -e 's:\;SEMICOLON|\!EXCLAMATIONMARK:PERIOD:g' \
         -e 's:,COMMA:COMMA:g' -e 's:\?QUESTIONMARK:QUESTIONMARK:g' \
         -e 's:\.PERIOD:PERIOD:g' \
-        -e 's/\xc2\xad|\xc2\x8d|\xc2\x90|\xc2\x93|\xc2\x9d|\x60|´|‟|‐|~|‑|‒|—|―|−|•|’|⋄|±|×||·|®|©|||//g' \
+        -e 's:(PERIOD|COMMA|QUESTIONMARK)[^ ]+:\1:g' \
         | cut -d' ' -f1,2 \
         | egrep -v '^ |^$' \
         | awk -F' ' '{if ($2 == "") print $1,"O"; else print $0}' \
@@ -88,7 +89,7 @@ sed -re 's: O$::' -e 's:COMMA:,COMMA:' \
 | tr '\n' ' ' | sed -r 's: +: :g' \
 > $wertestout/test_predictions_punct2_style_${p}wer.txt
 
-sed -r 's/\xc2\xad|\xc2\x8d|\xc2\x90|\xc2\x93|\xc2\x9d|\x60|´|‟|‐|~|‑|‒|—|―|−|•|’|⋄|±|×||·|®|©|||//g' \
+sed -r 's/[^A-Za-z0-9 .,:;\?\!$#@%&°\x27\/<>\-]/ /g' -e 's/ +/ /g' \
 < $origwertestdir/wer${p}perc.${input}.txt > $tmp/${p}wer.tmp
 
 echo 'Calculate F1-scores'

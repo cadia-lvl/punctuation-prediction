@@ -21,7 +21,7 @@ NUM = '<NUM>'
 EOS_PUNCTS = {".": ".PERIOD", "?": "?QUESTIONMARK", "!": "!EXCLAMATIONMARK"}
 INS_PUNCTS = {",": ",COMMA", ";": ";SEMICOLON", ":": ":COLON", "-": "-DASH"}
 
-forbidden_symbols = re.compile(r"[\[\]\(\)\\\>\<\=\+\_\*]")
+forbidden_symbols = re.compile(r"[\[\]\(\)\/\\\>\<\=\+\_\*]")
 numbers = re.compile(r"\d")
 multiple_punct = re.compile(r'([\.\?\!\,\:\;\-])(?:[\.\?\!\,\:\;\-]){1,}')
 

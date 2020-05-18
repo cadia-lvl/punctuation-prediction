@@ -1,6 +1,10 @@
 #!/bin/bash -e
 
-# Run a sequence 2 sequence transformer that learns to insert punctuation
+# Run a fairseq sequence-to-sequence transformer that learns to insert punctuation.
+# Following: https://github.com/pytorch/fairseq/blob/master/examples/translation/README.md#training-a-new-model
+# The Icelandic Gigaword corpus data is obtained with ../process/rmh_subset_specific.ipynb
+# and cleaned with rmh_data_cleaning.sh
+# The English Europarl data is obtained and cleaned with ../process/europarl_cleaning.sh
 cd seq2seq
 
 input=rmh
