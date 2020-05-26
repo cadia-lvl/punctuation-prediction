@@ -53,5 +53,3 @@ To calculate the precision, recall and F1-score, the output file that your model
 To play with the model, run:
 `python play_with_model.py <model_path>`
 
-Since this is a bidirectional model, it needs future context so short sentences don't work.
-
