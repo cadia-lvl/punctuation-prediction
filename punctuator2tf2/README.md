@@ -35,7 +35,7 @@ like all the members who have just spoken ,COMMA the commission therefore sincer
 following the recognition of taiwan by the fyrom ,COMMA china decided ,COMMA as you know ,COMMA to exercise its veto in the security council against the extension of the mandate of unpredep .PERIOD 
 the presidency of the european union tried to get the authorities in peking and skopje to reach a consensus ,COMMA but these attempts were unsuccessful .PERIOD
 ```
-Note that the .dev file was used to validate the training, use the test file to punctuate.
+Note that the .dev file was used to validate the training, use the .test file to punctuate.
 
 `<model_path>`is the path to the trained model `"Model_{model_name}_h{num_hidden}_lr{learning_rate}.pcl"`
 
