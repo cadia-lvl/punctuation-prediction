@@ -1,3 +1,6 @@
 [submodule "fairseq"]
 	path = fairseq
 	url = https://github.com/pytorch/fairseq
+[submodule "transformers"]
+	path = transformers
+	url = https://github.com/huggingface/transformers/
