@@ -13,7 +13,7 @@ where `<data_dir>` is the directory of the path defined in line 13 in `data.py`.
 
 ## Main
 
-The main file takes in the path to the processed data in `data.py`, `<datadir>` and the model which is defined in `models.py``
+The main file takes in the path to the processed data in `data.py`, `<datadir>` and the model which is defined in `models.py`.
 The main and punctuator files might take a long time to run, depending on the size of the data, so it's a good idea to use a GPU.
 
 To run the main-file, type:
