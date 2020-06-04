@@ -13,7 +13,7 @@ where `<data_dir>` is the directory of the path defined in line 13 in `data.py`.
 
 ## Main
 
-The main file takes in the path to the processed data in `data.py`, `<datadir>` and the model which is defined in `models.py``
+The main file takes in the path to the processed data in `data.py`, `<datadir>` and the model which is defined in `models.py`.
 The main and punctuator files might take a long time to run, depending on the size of the data, so it's a good idea to use a GPU.
 
 To run the main-file, type:
@@ -35,7 +35,7 @@ like all the members who have just spoken ,COMMA the commission therefore sincer
 following the recognition of taiwan by the fyrom ,COMMA china decided ,COMMA as you know ,COMMA to exercise its veto in the security council against the extension of the mandate of unpredep .PERIOD 
 the presidency of the european union tried to get the authorities in peking and skopje to reach a consensus ,COMMA but these attempts were unsuccessful .PERIOD
 ```
-Note that the .dev file was used to validate the training, use the test file to punctuate.
+Note that the .dev file was used to validate the training, use the .test file to punctuate.
 
 `<model_path>`is the path to the trained model `"Model_{model_name}_h{num_hidden}_lr{learning_rate}.pcl"`
 
@@ -52,6 +52,4 @@ To calculate the precision, recall and F1-score, the output file that your model
 
 To play with the model, run:
 `python play_with_model.py <model_path>`
-
-Since this is a bidirectional model, it needs future context so short sentences don't work.
 
