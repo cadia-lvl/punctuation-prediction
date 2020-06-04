@@ -17,7 +17,6 @@ All we provide here for the transformers are
 - For HuggingFace's transformer: seqeval and fastprogress
 
 Installation with the HuggingFace and Fairseq submodules:
-
 pip install seqeval
 pip install git+https://github.com/fastai/fastprogress.git
 git clone --recurse-submodules https://github.com/cadia-lvl/punctuation-prediction
