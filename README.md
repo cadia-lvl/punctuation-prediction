@@ -17,7 +17,7 @@ All we provide here for the transformers are
 
 Installation with the HuggingFace and Fairseq submodules:
 
-git clone --recurse-submodules https://github.com/cadia-lvl/punctuation-detection
+git clone --recurse-submodules https://github.com/cadia-lvl/punctuation-prediction
 
 ## Licence
 MIT License
