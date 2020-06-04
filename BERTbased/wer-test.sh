@@ -8,20 +8,22 @@ set -o pipefail
 
 input=$1
 datadir=$2
+outdir=$3
 
 export DATA_DIR=$datadir
-export SCRIPT_DIR=transformers/examples/token-classification # NOTE: /home/staff/inga/transformers/examples/ner, gpu stuff updated on the other
+export SCRIPT_DIR=transformers/examples/token-classification
 export MAX_LENGTH=60
 export MAX_SEQ_LENGTH=180
 export BERT_MODEL=bert-base-multilingual-cased
-export OUTPUT_DIR=/work/inga/punctuation/NERtrans-out/$input-transformer-model
+export OUTPUT_DIR=$outdir
 export BATCH_SIZE=16
 export NUM_EPOCHS=3
 export SAVE_STEPS=3000
 export SEED=42
 
 error_calc_dir=utils
-origwertestdir=/work/helgasvala/tfpunctuationmars/tfpunctuation/Samanburður2604/bigdata/wer_testfiles
+# You need to use the directory with your WER inserted files
+origwertestdir=./data/wer_testfiles
 wertest=$DATA_DIR/wer_test
 wertestout=$OUTPUT_DIR/wer_test
 tmp=$wertest/tmp
@@ -75,7 +77,6 @@ python3 ${SCRIPT_DIR}/run_tf_ner.py \
 --per_device_train_batch_size $BATCH_SIZE \
 --save_steps $SAVE_STEPS \
 --seed $SEED \
---gpus '0' \
 --do_predict"
 
 mv $OUTPUT_DIR/test_results.txt $wertestout/test_results_${p}wer.txt

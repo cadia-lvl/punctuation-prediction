@@ -3,7 +3,7 @@
 # Adapted from https://github.com/pytorch/fairseq/blob/master/examples/translation/prepare-iwslt14.sh
 #
 # Define the data directory
-datadir=$1 #/work/inga/data/rmh_subset/for_fairseq/sample55/lc_target #/work/inga/data/europarl/processed/fairseq # Created with rmh_data_cleaning.sh
+datadir=$1 # Created with rmh_data_cleaning.sh or europarl_cleaning.sh
 input=$2 #rmh # name of data
 casing=${3:-} # casing will stay empty if a 3rd argument is not passed #lc
 

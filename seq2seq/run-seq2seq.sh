@@ -5,9 +5,8 @@
 # The Icelandic Gigaword corpus data is obtained with ../process/rmh_subset_specific.ipynb
 # and cleaned with rmh_data_cleaning.sh
 # The English Europarl data is obtained and cleaned with ../process/europarl_cleaning.sh
-cd seq2seq
 
-input=rmh
+input=rmh # Choose yourself
 casing=
 ext=
 if [ -n $casing ]; then
@@ -15,15 +14,9 @@ if [ -n $casing ]; then
 fi
 do_wer_tests=false
 
-if [ "$input" = "rmh" ]; then
-    datadir=/work/inga/data/${input}_subset/fairseq/sample55
-    elif [ "$input" = "ep" ]; then
-    datadir=/work/inga/data/europarl/processed/fairseq
-else
-    echo "Unrecognized input."
-fi
-export bindatadir=/work/inga/data/data-bin/${input}$ext.tokenized.nopuncts-${casing}puncts
-export modeldir=/work/inga/punctuation/fairseq-out/${input}$ext/checkpoints
+datadir=./data/processed/${input}/fairseq
+export bindatadir=./data-bin/${input}$ext.tokenized.nopuncts-${casing}puncts
+export modeldir=./out/fairseq-out/${input}$ext/checkpoints
 export log=$modeldir/log/train-$(date +'%Y%m%d').log
 
 mkdir -p $modeldir $log
@@ -31,7 +24,7 @@ mkdir -p $modeldir $log
 conda activate ptenv
 
 # Prepare the data. casing is an optional argument
-bash prepare-data-fairseqNMT.sh $datadir $input $casing
+bash seq2seq/prepare-data-fairseqNMT.sh $datadir $input $casing
 
 # Preprocess/binarize the data
 TEXT=$datadir/${input}${casing}.tokenized
@@ -42,7 +35,7 @@ srun --mem=4G fairseq-preprocess --source-lang nopuncts --target-lang ${casing}p
 
 # Train a Transformer translation model
 # Note: --max-tokens specifies the batch size
-sbatch --export=log=$log,datadir=$datadir,modeldir=$modeldir run-seq2seq.sbatch
+sbatch --export=log=$log,datadir=$datadir,modeldir=$modeldir seq2seq/run-seq2seq.sbatch
 
 # Evaluate our trained model
 srun --mem 8G --time 0-08:00 \
@@ -74,13 +67,13 @@ sed -e 's:COMMA:,COMMA:g' \
 | tr '\n' ' ' | sed -r 's: +: :g' \
 > $modeldir/test_predictions_punct2_style.txt
 
-python ../utils/error_calculator.py \
+python utils/error_calculator.py \
 $modeldir/target_punct2_style.txt $modeldir/test_predictions_punct2_style.txt \
 > $modeldir/test_error.txt
 
 if [ $do_wer_tests = "true" ]; then
     echo 'Apply the model on text with different WER inserted'
-    bash wer-test-seq2seq.sh $datadir/wer_test$ext $modeldir/wer_test $input $casing
+    bash seq2seq/wer-test-seq2seq.sh $datadir/wer_test$ext $modeldir/wer_test $input $casing
 fi
 
 exit 0;

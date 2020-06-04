@@ -21,21 +21,23 @@ input=rmh  #ep
 do_wer_tests=false
 
 if [ "$input" = "rmh" ]; then
-    orig=/work/inga/data/rmh_subset/punctuator/sample55
-    export DATA_DIR=/work/inga/data/rmh_subset/NERtrans
+    # This is the path where the original data is, after processing with process/rmh_data_cleaning.sh
+    orig=./data/processed/rmh
+    # This is the path where the processed data is created and then stored, update it to where you want to see your data
+    export DATA_DIR=$orig/NERtrans
     elif [ "$input" = "ep" ]; then
-    orig=/work/inga/data/europarl/processed
-    export DATA_DIR=/work/inga/data/europarl/processed/NERtrans
+    orig=./data/processed/ep
+    export DATA_DIR=$orig/NERtrans
 else
     echo "Unrecognized input."
 fi
 
 error_calc_dir=utils
-export SCRIPT_DIR=/home/staff/inga/transformers/examples/ner #transformers/examples/ner
+export SCRIPT_DIR=transformers/examples/token-classification
 export MAX_LENGTH=60
 export MAX_SEQ_LENGTH=180
 export BERT_MODEL=bert-base-multilingual-cased
-export OUTPUT_DIR=/work/inga/punctuation/NERtrans-out/$input-transformer-model
+export OUTPUT_DIR=.out/BERTbased-out/$input-transformer-model
 export BATCH_SIZE=16
 export NUM_EPOCHS=3
 export SAVE_STEPS=3000
@@ -87,7 +89,7 @@ sbatch \
 --job-name=${input}-NER-transformer \
 --nodelist=torpaq --partition=longrunning \
 --output=${DATA_DIR}/tf_${input}_transformer_$d.log \
---gres=gpu:1 --mem=28G --time=2-00:00 \
+--gres=gpu:4 --mem=28G --time=2-00:00 \
 --wrap="srun \
 python3 ${SCRIPT_DIR}/run_tf_ner.py \
 --data_dir ${DATA_DIR}/ \
@@ -101,7 +103,6 @@ python3 ${SCRIPT_DIR}/run_tf_ner.py \
 --save_steps $SAVE_STEPS \
 --seed $SEED \
 --fp16 \
---gpus '0' \
 --do_train \
 --do_eval \
 --do_predict"
@@ -122,7 +123,7 @@ $orig/${input}.test.txt $OUTPUT_DIR/test_predictions_theano_style.txt \
 # NOTE! The following can't be run like this. Need to find another way
 # if [ $do_wer_tests = "true" ]; then
 #     echo 'Apply the model on text with different WER inserted'
-#     bash wer-test.sh $input $DATA_DIR
+#     bash wer-test.sh $input $DATA_DIR $OUTPUT_DIR
 # fi
 
 exit 0;

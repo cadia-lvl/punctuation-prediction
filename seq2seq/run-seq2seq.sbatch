@@ -8,7 +8,7 @@
 #SBATCH --mem=18G
 
 # Declare the variables
-# To run: sbatch --export=log=$log,datadir=$datadir,modeldir=$modeldir /home/staff/inga/h12/punctuation/run-seq2seq.sbatch
+# To run: sbatch --export=log=$log,datadir=$datadir,modeldir=$modeldir seq2seq/run-seq2seq.sbatch
 
 srun fairseq-train \
 $bindatadir \

@@ -7,15 +7,16 @@ set -o pipefail
 # but added afterwards cleaning for transformer training
 # NOTE! A list of proper nouns needs to come from somewhere (words only used capitalized).
 # Or a better true casing needs to be implemented
-scriptdir=/home/staff/inga/h12/punctuation-detection
-datadir=/work/inga/data/rmh_subset
+
+# This is the path where the original data is. You have to change this to where your data is
+orig=./data/rmh
+datadir=./data/processed/rmh
 tmp=$datadir/tmp
 log=$datadir/log
-punct2=$datadir/punctuator
 fairseq=$datadir/fairseq
 max_len=60 # for fairseq data
 
-mkdir -p $tmp $log $punct2 $fairseq
+mkdir -p $tmp $log $fairseq
 
 conda activate tf21env
 
@@ -36,7 +37,7 @@ echo "Clean the data by removing and rewriting lines using sed regex"
 # 11. Remove hyphen after [;:,] and deal with multiple punctuation after words/numbers
 # 12. Remove symbols other than letters or numbers at line beginnings
 # 13. Remove lines which don't contain letters and change to one space between words.
-for n in morgunbladid_subset ljosvakamidlar textasafn_arnastofnun; do
+for n in morgunbladid ljosvakamidlar textasafn_arnastofnun; do
     sed -re 's:[…„“”\"\|«»‘*<>●]|::g' -e 's: ,, |_: :g' -e 's: +$::' \
     -e '/^.*?[^\.\?\!]$/d' \
     -e '/\^|¦|https|\[ \.$|www \.$|\.\.\./d' \
@@ -50,13 +51,13 @@ for n in morgunbladid_subset ljosvakamidlar textasafn_arnastofnun; do
     -e 's/([;:,]) -/\1/g' -e 's:([^ .,:;?!-]+) ([.,:;?! -]+)([.,:;?!-]):\1 \3:g' \
     -e 's:^[^A-ZÁÐÉÍÓÚÝÞÆÖa-záðéíóúýþæö0-9]+::' \
     -e '/^[^A-ZÁÐÉÍÓÚÝÞÆÖa-záðéíóúýþæö]*$/d' -e 's/ +/ /g' \
-    < $datadir/rmh_${n}.txt > $tmp/rmh_${n}_cleaned.txt
+    < $orig/rmh_${n}.txt > $tmp/rmh_${n}_cleaned.txt
 done
 
 echo "Expand some abbreviations which don't have cases."
 echo "Remove the periods from the rest"
 # End with removing again lines not ending with an EOS punct.
-for n in morgunbladid_subset ljosvakamidlar textasafn_arnastofnun; do
+for n in morgunbladid ljosvakamidlar textasafn_arnastofnun; do
     # Start with expanding some abbreviations using regex
     sed -re 's:\ba\.m\.k ?\.:að minnsta kosti:g' \
     -e 's:\bág ?\.:ágúst:g' \
@@ -105,22 +106,22 @@ for n in morgunbladid_subset ljosvakamidlar textasafn_arnastofnun; do
 done
 
 echo "Create a single data set"
-rm $tmp/ljosv_textas_morgunb.cleaned_subset.txt
-for n in morgunbladid_subset ljosvakamidlar textasafn_arnastofnun; do
-    cat $tmp/rmh_${n}_cleaned_abbrexp.txt >> $tmp/ljosv_textas_morgunb.cleaned_subset.txt
+rm $tmp/ljosv_textas_morgunb.cleaned.txt
+for n in morgunbladid ljosvakamidlar textasafn_arnastofnun; do
+    cat $tmp/rmh_${n}_cleaned_abbrexp.txt >> $tmp/ljosv_textas_morgunb.cleaned.txt
 done
 
 echo "Now the data can be formatted for training using preprocess_truecase.py"
-srun python ${scriptdir}/process/preprocess_truecase.py \
-$tmp/ljosv_textas_morgunb.cleaned_subset.txt $tmp/ljosv_textas_morgunb.cleaned_subset_formatted.txt \
+srun python process/preprocess_truecase.py \
+$tmp/ljosv_textas_morgunb.cleaned.txt $tmp/ljosv_textas_morgunb.cleaned_formatted.txt \
 &>$log/preprocess_data.log
 
 echo "Remove duplicates"
-awk '!x[$0]++' $tmp/ljosv_textas_morgunb.cleaned_subset_formatted.txt > $tmp/ljosv_textas_morgunb.cleaned_subset_formatted_uniq.txt
+awk '!x[$0]++' $tmp/ljosv_textas_morgunb.cleaned_formatted.txt > $tmp/ljosv_textas_morgunb.cleaned_formatted_uniq.txt
 
 echo "Lowercase what comes after an EOS punctuation, unless it is an acronym"
-file=ljosv_textas_morgunb.cleaned_subset_formatted_uniq
-propernouns=/work/inga/data/rmh_subset/propernouns.tmp
+file=ljosv_textas_morgunb.cleaned_formatted_uniq
+propernouns=/work/inga/data/rmh/propernouns.tmp
 # NOTE! I need to have a list of propernouns from somewhere. I extract it from a wordlist I have for Althingi
 sed -r 's:^.*:\l&:' $propernouns |sort -u > $tmp/propernouns_lower.tmp
 sed -re 's:^([A-ZÁÉÍÓÚÝÞÆÖ][a-záðéíóúýþæö ]):\l\1:' -e 's/:COLON ([A-ZÁÉÍÓÚÝÞÆÖ][a-záðéíóúýþæö ])/:COLON \l\1/g' \
@@ -152,21 +153,21 @@ echo "split it up into train, dev and test sets"
 # Then I pipe the rest into a training file
 split -n l/100 $tmp/${file}_truecase.txt
 
-head -n400 x* | egrep -v "==>" | egrep -v "^ *$" > $punct2/rmh.dev.txt
+head -n400 x* | egrep -v "==>" | egrep -v "^ *$" > $datadir/rmh.dev.txt
 for f in x* ; do
-    head -n800 $f | tail -n +401 >> $punct2/rmh.test.txt
+    head -n800 $f | tail -n +401 >> $datadir/rmh.test.txt
 done
-tail -n +801 x* | egrep -v "==>" | egrep -v "^ *$" > $punct2/rmh.train.txt
+tail -n +801 x* | egrep -v "==>" | egrep -v "^ *$" > $datadir/rmh.train.txt
 rm x*
 
 # Print info about the tokens in train, dev and test
-for f in $punct2/rmh.*; do grep -o .PERIOD $f | wc -l; done
-for f in $punct2/rmh.*; do grep -o ,COMMA $f | wc -l; done
-for f in $punct2/rmh.*; do grep -o ?QUESTIONMARK $f | wc -l; done
-for f in $punct2/rmh.*; do grep -o \!EXCLAMATIONMARK $f | wc -l; done
-for f in $punct2/rmh.*; do grep -o :COLON $f | wc -l; done
-for f in $punct2/rmh.*; do grep -o \;SEMICOLON $f | wc -l; done
-for f in $punct2/rmh.*; do grep -o "\-DASH" $f | wc -l; done
+for f in $datadir/rmh.*; do grep -o .PERIOD $f | wc -l; done
+for f in $datadir/rmh.*; do grep -o ,COMMA $f | wc -l; done
+for f in $datadir/rmh.*; do grep -o ?QUESTIONMARK $f | wc -l; done
+for f in $datadir/rmh.*; do grep -o \!EXCLAMATIONMARK $f | wc -l; done
+for f in $datadir/rmh.*; do grep -o :COLON $f | wc -l; done
+for f in $datadir/rmh.*; do grep -o \;SEMICOLON $f | wc -l; done
+for f in $datadir/rmh.*; do grep -o "\-DASH" $f | wc -l; done
 
 echo "Make a special dataset which fits for a seq2seq transformer training"
 echo "and can be used to learn both punctuation and capitalization"
@@ -250,16 +251,16 @@ for f in $fairseq/rmh.train.puncts; do grep -o QUESTIONMARK $f | wc -l; done
 # # In the files textasafn comes first, then ljosvakamidlar and finally morgunbladid
 
 # #Create a sample in these proportions:
-# mkdir -p $punct2/sample55
-# head -n 108000 $punct2/rmh.train.txt > $punct2/sample55/rmh.train.txt
-# tail -n +350000 $punct2/rmh.train.txt | head -n 1862000 >> $punct2/sample55/rmh.train.txt
-# tail -n 730000 $punct2/rmh.train.txt >> $punct2/sample55/rmh.train.txt
+# mkdir -p $datadir/sample55
+# head -n 108000 $datadir/rmh.train.txt > $datadir/sample55/rmh.train.txt
+# tail -n +350000 $datadir/rmh.train.txt | head -n 1862000 >> $datadir/sample55/rmh.train.txt
+# tail -n 730000 $datadir/rmh.train.txt >> $datadir/sample55/rmh.train.txt
 
 # # Had to redo from punctuator data in sample55:
 # tmp=$fairseq/sample55/tmp
 # mkdir -p $tmp
 # for f in train dev test; do
-#     tr '\n' ' ' < $punct2/sample55/rmh.${f}.txt | awk -v m=$max_len '
+#     tr '\n' ' ' < $datadir/sample55/rmh.${f}.txt | awk -v m=$max_len '
 #     {
 #         n = split($0, a, " ")
 #         for (i=1; i<=n; i++)

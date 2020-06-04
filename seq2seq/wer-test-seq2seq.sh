@@ -4,7 +4,8 @@
 cd seq2seq
 conda activate ptenv
 
-orig=/work/helgasvala/tfpunctuationmars/tfpunctuation/Samanburður2604/bigdata/wer_testfiles
+# You need to use the directory with your WER inserted files
+origwertestdir=./data/wer_testfiles
 programdir=~/opt
 
 wer_test=$1
@@ -15,8 +16,8 @@ if [ -n $casing ]; then
     ext=_$casing
 fi
 
-bindatadir=/work/inga/data/data-bin/${input}$ext.tokenized.nopuncts-${casing}puncts
-modeldir=/work/inga/punctuation/fairseq-out/${input}$ext/checkpoints
+bindatadir=./data-bin/${input}$ext.tokenized.nopuncts-${casing}puncts
+modeldir=./out/fairseq-out/${input}$ext/checkpoints
 tmp=$wer_test/tmp
 prep=$wer_test/${input}${ext}.tokenized
 toktmp=$prep/tmp
@@ -126,7 +127,7 @@ for p in 5 10 15 20; do
 done
 
 for p in 5 10 15 20; do
-    python ../utils/error_calculator.py \
+    python utils/error_calculator.py \
     $wertestout/${input}.wer${p}perc.target.punct2_style.txt $wertestout/${input}.wer${p}perc.punctuated.punct2_style.txt \
     > $wertestout/test_error_${p}wer.txt
 done
