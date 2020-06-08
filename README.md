@@ -26,3 +26,6 @@ git clone --recurse-submodules https://github.com/cadia-lvl/punctuation-predicti
 MIT License
 
 Copyright (c) 2020 Language and Voice Lab
+
+## Citation
+
