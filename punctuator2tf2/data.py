@@ -10,7 +10,7 @@ import codecs
 import fnmatch
 
 # This is the path where the processed data is created and then stored, update it to where you want to see your data
-DATA_PATH = "./data"
+DATA_PATH = "./punctdata"
 END = "</S>"
 UNK = "<UNK>"
 
