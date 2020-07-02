@@ -9,7 +9,7 @@ In lines 31-32, choose which punctuation marks you want your system to learn. We
 Then run:
 ``` python data.py <data_dir> ```
 
-where `<data_dir>` is the directory of the path defined in line 13 in `data.py`. 
+where `<data_dir>` is the directory of the preprocessed and cleaned `*.train.txt`, `*.dev.txt` and `*.test.txt` files.
 
 ## Main
 
