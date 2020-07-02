@@ -8,15 +8,13 @@ set -o pipefail
 # and cleaned with rmh_data_cleaning.sh
 # The English Europarl data is obtained and cleaned with ../process/europarl_cleaning.sh
 
-conda activate tf20env
+conda activate tf21env
 
-git clone https://github.com/huggingface/transformers
+# git clone https://github.com/huggingface/transformers
 cd transformers
 pip install .
-pip install seqeval
-pip install git+https://github.com/fastai/fastprogress.git
+cd ..
 
-cd -
 input=rmh  #ep
 do_wer_tests=false
 
@@ -48,20 +46,21 @@ mkdir -p $tmp
 d=$(date +'%Y%m%d')
 
 echo "Get the data on the right format"
-# 1. Put one word (+ a possible punct) per line,
-# 2. add a space between the punct token and the word,
-# 3-7. Change the punct symbols from the punctuator 2 look and map puncts to periods, commas and question marks
-# 8. Remove stuff stuck to the punct symbol, usually an apostrophe
-# 9. Keep only the first two columns (there can be more than one punctuation after a word)
-# 10. Remove lines containing only a label or empty
-# 11. Add O to empty slots in the 2nd column
+# 1. Remove weird symbols and remove space between a word and the following punctuation,
+# 2. Put one word (+ a possible punct) per line,
+# 3. Add a space between the punct token and the word,
+# 4-8. Change the punct symbols from the punctuator 2 look and map puncts to periods, commas and question marks
+# 9. Remove stuff stuck to the punct symbol, usually an apostrophe
+# 10. Keep only the first two columns (there can be more than one punctuation after a word)
+# 11. Remove lines containing only a label or empty
+# 12. Add O to empty slots in the 2nd column
 for i in train dev test; do
     (
-        sed -re 's/[^A-Za-z0-9 .,:;\?\!$#@%&°\x27\/<>\-]/ /g' -e 's/ +/ /g' -e 's: ([\.,\?\!\:\;\-][A-Z]{4,}):\1:g' \
+        sed -re 's/[^A-ZÁÐÉÍÓÚÝÞÆÖa-záðéíóúýþæö0-9 .,:;\?\!$#@%&°\x27\/<>\-]/ /g' -e 's/ +/ /g' -e 's: ([\.,\?\!\:\;\-][A-Z]{4,}):\1:g' \
         < $orig/${input}.${i}.txt | tr ' ' '\n' \
         | sed -re 's:([\.,\?\!\:\;\-][A-Z]{4,}): \1:g' \
-        -e 's:\-DASH|\:COLON:COMMA:g' \
-        -e 's:\;SEMICOLON|\!EXCLAMATIONMARK:PERIOD:g' \
+        -e 's:\;SEMICOLON|\-DASH|\:COLON:COMMA:g' \
+        -e 's:\!EXCLAMATIONMARK:PERIOD:g' \
         -e 's:,COMMA:COMMA:g' \
         -e 's:\?QUESTIONMARK:QUESTIONMARK:g' \
         -e 's:\.PERIOD:PERIOD:g' \
@@ -89,7 +88,7 @@ sbatch \
 --job-name=${input}-NER-transformer \
 --nodelist=torpaq --partition=longrunning \
 --output=${DATA_DIR}/tf_${input}_transformer_$d.log \
---gres=gpu:4 --mem=28G --time=2-00:00 \
+--gres=gpu:1 --mem=32G --time=12-00:00 \
 --wrap="srun \
 python3 ${SCRIPT_DIR}/run_tf_ner.py \
 --data_dir ${DATA_DIR}/ \

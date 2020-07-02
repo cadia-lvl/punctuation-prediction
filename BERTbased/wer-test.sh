@@ -31,6 +31,15 @@ mkdir -p $tmp $wertestout
 
 conda activate tf20env
 
+echo "Get the data on the right format"
+# 1. Remove weird symbols and remove space between a word and the following punctuation,
+# 2. Put one word (+ a possible punct) per line,
+# 3. Add a space between the punct token and the word,
+# 4-8. Change the punct symbols from the punctuator 2 look and map puncts to periods, commas and question marks
+# 9. Remove stuff stuck to the punct symbol, usually an apostrophe
+# 10. Keep only the first two columns (there can be more than one punctuation after a word)
+# 11. Remove lines containing only a label or empty
+# 12. Add O to empty slots in the 2nd column
 for p in 5 10 15 20; do
     (
         sed -re 's/[^A-Za-z0-9 .,:;\?\!$#@%&°\x27\/<>\-]/ /g' -e 's/ +/ /g' -e 's: ([\.,\?\!\:\;\-][A-Z]{4,}):\1:g' \

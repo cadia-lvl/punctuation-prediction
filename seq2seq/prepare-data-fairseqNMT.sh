@@ -30,7 +30,7 @@ SCRIPTS=$programdir/mosesdecoder/scripts
 TOKENIZER=$SCRIPTS/tokenizer/tokenizer.perl
 CLEAN=$SCRIPTS/training/clean-corpus-n.perl
 BPEROOT=$programdir/subword-nmt/subword_nmt
-BPE_TOKENS=16000
+BPE_TOKENS=20000
 
 if [ ! -d "$SCRIPTS" ]; then
     echo "Please set SCRIPTS variable correctly to point to Moses scripts."
@@ -61,12 +61,12 @@ done
 
 echo "learn_bpe.py on ${TRAIN}..."
 # Tilgreina special tokens
-srun python $BPEROOT/learn_bpe.py -s $BPE_TOKENS < $TRAIN > $BPE_CODE
+srun --mem=8G python $BPEROOT/learn_bpe.py -s $BPE_TOKENS < $TRAIN > $BPE_CODE
 
 for L in $src $tgt; do
     for f in train dev test; do
         echo "apply_bpe.py to ${f}..."
-        srun python $BPEROOT/apply_bpe.py \
+        srun --mem=8G python $BPEROOT/apply_bpe.py \
         -c $BPE_CODE \
         --glossaries "PERIOD" "COMMA" "QUESTIONMARK" \
         < $tmp/$f.clean.$L > $prep/$f.$L &

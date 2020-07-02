@@ -6,6 +6,13 @@
 # and cleaned with rmh_data_cleaning.sh
 # The English Europarl data is obtained and cleaned with ../process/europarl_cleaning.sh
 
+conda activate ptenv
+
+# git clone https://github.com/pytorch/fairseq
+cd fairseq
+pip install --editable ./
+cd ..
+
 input=rmh # Choose yourself
 casing=
 ext=
@@ -14,24 +21,22 @@ if [ -n $casing ]; then
 fi
 do_wer_tests=false
 
-datadir=./data/processed/${input}/fairseq
+datadir=./data/processed/${input}/seq2seq
 export bindatadir=./data-bin/${input}$ext.tokenized.nopuncts-${casing}puncts
-export modeldir=./out/fairseq-out/${input}$ext/checkpoints
+export modeldir=./out/seq2seq-out/${input}$ext/checkpoints
 export log=$modeldir/log/train-$(date +'%Y%m%d').log
 
 mkdir -p $modeldir $log
 
-conda activate ptenv
-
 # Prepare the data. casing is an optional argument
-bash seq2seq/prepare-data-fairseqNMT.sh $datadir $input $casing
+srun --mem=8G bash seq2seq/prepare-data-fairseqNMT.sh $datadir $input $casing &> $datadir/prepare-data.log
 
 # Preprocess/binarize the data
 TEXT=$datadir/${input}${casing}.tokenized
-srun --mem=4G fairseq-preprocess --source-lang nopuncts --target-lang ${casing}puncts \
+srun --mem=8G fairseq-preprocess --source-lang nopuncts --target-lang ${casing}puncts \
 --trainpref $TEXT/train --validpref $TEXT/dev --testpref $TEXT/test \
 --destdir $bindatadir --fp16 \
---workers 20 &
+--workers 20 2> $datadir/${input}${casing}.tokenized/fairseq-preprocess-error.log
 
 # Train a Transformer translation model
 # Note: --max-tokens specifies the batch size

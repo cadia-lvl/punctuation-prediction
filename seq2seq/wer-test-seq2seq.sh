@@ -17,7 +17,7 @@ if [ -n $casing ]; then
 fi
 
 bindatadir=./data-bin/${input}$ext.tokenized.nopuncts-${casing}puncts
-modeldir=./out/fairseq-out/${input}$ext/checkpoints
+modeldir=./out/seq2seq-out/${input}$ext/checkpoints
 tmp=$wer_test/tmp
 prep=$wer_test/${input}${ext}.tokenized
 toktmp=$prep/tmp

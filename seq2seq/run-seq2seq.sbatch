@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=fairseq-transformer
+#SBATCH --job-name=seq2seq-transformer
 #SBATCH --nodelist=torpaq
 #SBATCH --partition=longrunning
 #SBATCH --gres=gpu:4
