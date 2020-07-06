@@ -4,8 +4,8 @@ with open("README.md", "r") as readme:
     long_description = readme.read()
 
 setuptools.setup(
-    name="punctuator-isl", 
-    version="1.1.3",
+    name="punctuator-lvl2", 
+    version="1.1.1",
     author="Helga Svala Sigurðardóttir",
     author_email="helgas@ru.is",
     url='https://github.com/cadia-lvl/punctuation-prediction/tree/master/frontend',
@@ -29,7 +29,7 @@ setuptools.setup(
     ],
     entry_points={
                 'console_scripts' : [
-                'punctuator=punctuator_isl.main:main',
+                'punctuate=punctuator_lvl2.main:main',
                 ],
     },
     )
