@@ -61,14 +61,17 @@ done
 
 echo "learn_bpe.py on ${TRAIN}..."
 # Tilgreina special tokens
-srun --mem=8G python $BPEROOT/learn_bpe.py -s $BPE_TOKENS < $TRAIN > $BPE_CODE
+python $BPEROOT/learn_bpe.py -s $BPE_TOKENS < $TRAIN > $BPE_CODE
 
 for L in $src $tgt; do
     for f in train dev test; do
         echo "apply_bpe.py to ${f}..."
-        srun --mem=8G python $BPEROOT/apply_bpe.py \
+        python $BPEROOT/apply_bpe.py \
         -c $BPE_CODE \
         --glossaries "PERIOD" "COMMA" "QUESTIONMARK" \
         < $tmp/$f.clean.$L > $prep/$f.$L &
     done
 done
+wait
+
+exit 0

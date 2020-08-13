@@ -1,14 +1,12 @@
 #!/bin/bash
 
 #SBATCH --job-name=seq2seq-transformer
-#SBATCH --nodelist=torpaq
-#SBATCH --partition=longrunning
 #SBATCH --gres=gpu:4
 #SBATCH --time=1-12:00
 #SBATCH --mem=18G
 
 # Declare the variables
-# To run: sbatch --export=log=$log,datadir=$datadir,modeldir=$modeldir seq2seq/run-seq2seq.sbatch
+# To run: sbatch --export=ALL seq2seq/run-seq2seq.sbatch
 
 srun fairseq-train \
 $bindatadir \
@@ -21,4 +19,5 @@ $bindatadir \
 --max-epoch 40 \
 --patience 10 \
 --fp16 \
+--tensorboard-logdir $modeldir/tblogs \
 --save-dir $modeldir &> $log

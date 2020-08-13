@@ -67,9 +67,9 @@ echo "and can be used to learn both punctuation and capitalization"
 # Maybe I should have skipped running this through preprocess.py but since it is already done
 # I will do the following:
 echo "Remove line breaks and create segments of length $max_len"
-tmp=$datadir/fairseq/tmp
+tmp=$datadir/seq2seq/tmp
 mkdir -p $tmp
-max_len=60 # for fairseq data
+max_len=60 # for seq2seq data
 for n in train dev test; do
     tr '\n' ' ' < ep.$n.txt \
     | awk -v m=$max_len '
@@ -86,16 +86,16 @@ done
 
 for n in train dev test; do
     # Create an input text without punctuation tokens
-    if [ ! -f "fairseq/ep.$n.nopuncts" ]; then
+    if [ ! -f "seq2seq/ep.$n.nopuncts" ]; then
         sed -re 's:[.,;:?\!-][A-Z]{4,}::g' \
         -e 's:[<>]::g' \
         -e 's:^[^A-ZÁÐÉÍÓÚÝÞÆÖa-záðéíóúýþæö0-9]+::' -e 's: $::' \
         < $tmp/ep.$n.puncts.seq \
-        > $datadir/fairseq/ep.$n.nopuncts &
+        > $datadir/seq2seq/ep.$n.nopuncts &
     fi
     
     # Create an output text with 'no-special-symbol' punctuation tokens
-    if [ ! -f "fairseq/ep.$n.puncts" ]; then
+    if [ ! -f "seq2seq/ep.$n.puncts" ]; then
         sed -re 's:[.,;:?\!-]([A-Z]{4,}):\1:g' \
         -e 's:[<>]::g' \
         -e 's:^[^A-ZÁÐÉÍÓÚÝÞÆÖa-záðéíóúýþæö0-9]+::' \
@@ -104,7 +104,7 @@ for n in train dev test; do
         -e 's:\bSEMICOLON\b|\bEXCLAMATIONMARK\b:PERIOD:g' \
         -e 's:^(PERIOD|COMMA|QUESTIONMARK) ::' \
         < $tmp/ep.$n.puncts.seq \
-        > $datadir/fairseq/ep.$n.puncts &
+        > $datadir/seq2seq/ep.$n.puncts &
     fi
 done
 

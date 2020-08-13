@@ -24,9 +24,10 @@ do_wer_tests=false
 datadir=./data/processed/${input}/seq2seq
 export bindatadir=./data-bin/${input}$ext.tokenized.nopuncts-${casing}puncts
 export modeldir=./out/seq2seq-out/${input}$ext/checkpoints
-export log=$modeldir/log/train-$(date +'%Y%m%d').log
+logdir=$modeldir/log
+export log=$logdir/train-$(date +'%Y%m%d').log
 
-mkdir -p $modeldir $log
+mkdir -p $modeldir $logdir
 
 # Prepare the data. casing is an optional argument
 srun --mem=8G bash seq2seq/prepare-data-fairseqNMT.sh $datadir $input $casing &> $datadir/prepare-data.log
@@ -36,11 +37,11 @@ TEXT=$datadir/${input}${casing}.tokenized
 srun --mem=8G fairseq-preprocess --source-lang nopuncts --target-lang ${casing}puncts \
 --trainpref $TEXT/train --validpref $TEXT/dev --testpref $TEXT/test \
 --destdir $bindatadir --fp16 \
---workers 20 2> $datadir/${input}${casing}.tokenized/fairseq-preprocess-error.log
+--workers 20
 
 # Train a Transformer translation model
 # Note: --max-tokens specifies the batch size
-sbatch --export=log=$log,datadir=$datadir,modeldir=$modeldir seq2seq/run-seq2seq.sbatch
+sbatch --export=ALL seq2seq/run-seq2seq.sbatch
 
 # Evaluate our trained model
 srun --mem 8G --time 0-08:00 \

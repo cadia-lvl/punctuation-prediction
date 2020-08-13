@@ -13,10 +13,10 @@ orig=./data/rmh
 datadir=./data/processed/rmh
 tmp=$datadir/tmp
 log=$datadir/log
-fairseq=$datadir/fairseq
-max_len=60 # for fairseq data
+seq2seq=$datadir/seq2seq
+max_len=60 # for seq2seq data
 
-mkdir -p $tmp $log $fairseq
+mkdir -p $tmp $log $seq2seq
 
 conda activate tf21env
 
@@ -121,7 +121,7 @@ awk '!x[$0]++' $tmp/ljosv_textas_morgunb.cleaned_formatted.txt > $tmp/ljosv_text
 
 echo "Lowercase what comes after an EOS punctuation, unless it is an acronym"
 file=ljosv_textas_morgunb.cleaned_formatted_uniq
-propernouns=/work/inga/data/rmh/propernouns.tmp
+propernouns=/work/inga/data/rmh/propernouns.txt
 # NOTE! I need to have a list of propernouns from somewhere. I extract it from a wordlist I have for Althingi
 sed -r 's:^.*:\l&:' $propernouns |sort -u > $tmp/propernouns_lower.tmp
 sed -re 's:^([A-ZÁÉÍÓÚÝÞÆÖ][a-záðéíóúýþæö ]):\l\1:' -e 's/:COLON ([A-ZÁÉÍÓÚÝÞÆÖ][a-záðéíóúýþæö ])/:COLON \l\1/g' \
@@ -136,14 +136,14 @@ tr "\n" "|" < $tmp/comm_proper.tmp \
 
 # split creates files with names starting with an x
 cd $tmp
-split -n l/100 $tmp/${file}_lower.tmp
+split -n l/100 ${file}_lower.tmp
 # Capitalize NOTE! I'm not sure what to do with the colons since the following word is not always capitalized
 for f in x* ; do
-    srun --mem 6G sed -re 's:^('$(cat $tmp/to_uppercase_pattern.tmp)'\b):\u\1:g' \
-    -e 's:(\:COLON) ('$(cat $tmp/to_uppercase_pattern.tmp)'\b):\1 \u\2:g' \
-    $tmp/$f > $tmp/${f}_truecase &
-    cat x* >> $tmp/${file}_truecase.txt
+    srun --mem 6G sed -re 's:^('$(cat to_uppercase_pattern.tmp)'\b):\u\1:g' \
+    -e 's:(\:COLON) ('$(cat to_uppercase_pattern.tmp)'\b):\1 \u\2:g' \
+    $f > ${f}_truecase &
 done
+cat x* >> ${file}_truecase.txt
 rm x*
 
 echo "split it up into train, dev and test sets"
@@ -203,44 +203,43 @@ done
 
 for n in train dev test; do
     # Create a lowercased input text without punctuation tokens
-    if [ ! -f "$fairseq/rmh.$n.nopuncts" ]; then
+    if [ ! -f "$seq2seq/rmh.$n.nopuncts" ]; then
         sed -re 's:[.,;:?\!-][A-Z]{4,}::g' \
         -e 's:.*:\L&:g' -e 's:<num>:NUM:g' \
-        -e 's:^[^A-ZÁÐÉÍÓÚÝÞÆÖa-záðéíóúýþæö0-9]+::' -e 's: $::' \
+        -e 's:^[^A-ZÁÐÉÍÓÚÝÞÆÖa-záðéíóúýþæö0-9]+::' -e 's: $::' -e 's: +: :g' \
         < $tmp/rmh.$n.puncts.seq \
-        > $fairseq/rmh.$n.nopuncts &
+        > $seq2seq/rmh.$n.nopuncts &
     fi
     # Create a truecased output text with 'no-special-symbol' punctuation tokens
-    if [ ! -f "$fairseq/rmh.$n.puncts" ]; then
+    if [ ! -f "$seq2seq/rmh.$n.puncts" ]; then
         sed -re 's:[.,;:?\!-]([A-Z]{4,}):\1:g' \
         -e 's:[<>]::g' \
         -e 's:^[^A-ZÁÐÉÍÓÚÝÞÆÖa-záðéíóúýþæö0-9]+::' \
         -e 's: $::' \
-        -e 's:\bDASH\b|\bCOLON\b:COMMA:g' \
-        -e 's:\bSEMICOLON\b|\bEXCLAMATIONMARK\b:PERIOD:g' \
+        -e 's:\bSEMICOLON\b|\bDASH\b|\bCOLON\b:COMMA:g' \
+        -e 's:\bEXCLAMATIONMARK\b:PERIOD:g' \
         -e 's:^(PERIOD|COMMA|QUESTIONMARK) ::' \
-        -e 's:(PERIOD|QUESTIONMARK) ([^ ]):\1 \u\2:g' \
         < $tmp/rmh.$n.puncts.seq \
-        > $fairseq/rmh.n.puncts &
+        > $seq2seq/rmh.$n.puncts &
     fi
     
-    if [ ! -f "$fairseq/rmh.$n.lcpuncts" ]; then
-        sed -re 's:-DASH\b|\:COLON\b:,COMMA:g' \
-        -e 's:;SEMICOLON\b|\!EXCLAMATIONMARK\b:.PERIOD:g' \
+    if [ ! -f "$seq2seq/rmh.$n.lcpuncts" ]; then
+        sed -re 's:;SEMICOLON\b|-DASH\b|\:COLON\b:,COMMA:g' \
+        -e 's:\!EXCLAMATIONMARK\b:.PERIOD:g' \
         -e 's: $::' -e 's:.*:\L&:g' -e 's:<num>:NUM:g' \
         -e 's:(\.period\b|,comma\b|\?questionmark\b):\U\1:g' \
         -e 's:^(\.PERIOD|,COMMA|\?QUESTIONMARK) ::' \
         -e 's:[.,?]([A-Z]{4,}):\1:g' \
         -e 's:^[^A-ZÁÐÉÍÓÚÝÞÆÖa-záðéíóúýþæö0-9]+::' \
         < $tmp/rmh.$n.puncts.seq \
-        > $fairseq/rmh.$n.lcpuncts &
+        > $seq2seq/rmh.$n.lcpuncts &
     fi
 done
 
 # Check the numbers for a seq2seq training sample
-for f in $fairseq/rmh.train.puncts; do grep -o PERIOD $f | wc -l; done
-for f in $fairseq/rmh.train.puncts; do grep -o COMMA $f | wc -l; done
-for f in $fairseq/rmh.train.puncts; do grep -o QUESTIONMARK $f | wc -l; done
+for f in $seq2seq/rmh.train.puncts; do grep -o PERIOD $f | wc -l; done
+for f in $seq2seq/rmh.train.puncts; do grep -o COMMA $f | wc -l; done
+for f in $seq2seq/rmh.train.puncts; do grep -o QUESTIONMARK $f | wc -l; done
 
 # ### For a 55M token subset I need to do the following:
 
@@ -257,7 +256,7 @@ for f in $fairseq/rmh.train.puncts; do grep -o QUESTIONMARK $f | wc -l; done
 # tail -n 730000 $datadir/rmh.train.txt >> $datadir/sample55/rmh.train.txt
 
 # # Had to redo from punctuator data in sample55:
-# tmp=$fairseq/sample55/tmp
+# tmp=$seq2seq/sample55/tmp
 # mkdir -p $tmp
 # for f in train dev test; do
 #     tr '\n' ' ' < $datadir/sample55/rmh.${f}.txt | awk -v m=$max_len '
@@ -275,28 +274,27 @@ for f in $fairseq/rmh.train.puncts; do grep -o QUESTIONMARK $f | wc -l; done
 #     -e 's:.*:\L&:g' -e 's:<num>:NUM:g' \
 #     -e 's:^[^A-ZÁÐÉÍÓÚÝÞÆÖa-záðéíóúýþæö0-9]+::' -e 's: $::' \
 #     < $tmp/rmh.$f.puncts.seq \
-#     > $fairseq/sample55/rmh.$f.nopuncts
+#     > $seq2seq/sample55/rmh.$f.nopuncts
 
 #     sed -re 's:[.,;:?\!-]([A-Z]{4,}):\1:g' \
 #     -e 's:[<>]::g' \
 #     -e 's:^[^A-ZÁÐÉÍÓÚÝÞÆÖa-záðéíóúýþæö0-9]+::' \
 #     -e 's: $::' \
-#     -e 's:\bDASH\b|\bCOLON\b:COMMA:g' \
-#     -e 's:\bSEMICOLON\b|\bEXCLAMATIONMARK\b:PERIOD:g' \
+#     -e 's:\bSEMICOLON\b|\bDASH\b|\bCOLON\b:COMMA:g' \
+#     -e 's:\bEXCLAMATIONMARK\b:PERIOD:g' \
 #     -e 's:^(PERIOD|COMMA|QUESTIONMARK) ::' \
-#     -e 's:(PERIOD|QUESTIONMARK) ([^ ]):\1 \u\2:g' \
 #     < $tmp/rmh.${f}.puncts.seq \
-#     > $fairseq/sample55/rmh.${f}.puncts &
+#     > $seq2seq/sample55/rmh.${f}.puncts &
 
-#     sed -re 's:-DASH\b|\:COLON\b:,COMMA:g' \
-#     -e 's:;SEMICOLON\b|\!EXCLAMATIONMARK\b:.PERIOD:g' \
+#     sed -re 's:;SEMICOLON\b|-DASH\b|\:COLON\b:,COMMA:g' \
+#     -e 's:\!EXCLAMATIONMARK\b:.PERIOD:g' \
 #     -e 's: $::' -e 's:.*:\L&:g' -e 's:<num>:NUM:g' \
 #     -e 's:(\.period\b|,comma\b|\?questionmark\b):\U\1:g' \
 #     -e 's:^(\.PERIOD|,COMMA|\?QUESTIONMARK) ::' \
 #     -e 's:[.,?]([A-Z]{4,}):\1:g' \
 #     -e 's:^[^A-ZÁÐÉÍÓÚÝÞÆÖa-záðéíóúýþæö0-9]+::' \
 #     < $tmp/rmh.${f}.puncts.seq \
-#     > $fairseq/sample55/rmh.${f}.lcpuncts &
+#     > $seq2seq/sample55/rmh.${f}.lcpuncts &
 # done
 
 exit 0;
