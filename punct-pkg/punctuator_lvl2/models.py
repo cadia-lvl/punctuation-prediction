@@ -1,11 +1,7 @@
-from __future__ import division
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]="-1" 
-import sys
-import operator
+os.environ["CUDA_VISIBLE_DEVICES"]="-1"
 import pickle
 import codecs
-import fnmatch
 import tensorflow as tf
 from tensorflow.keras import layers
 import numpy as np
@@ -21,15 +17,16 @@ MAX_SEQUENCE_LEN = 200
 
 MINIBATCH_SIZE=16
 
-WORD_VOCAB_FILE = os.path.join("vocabulary")
-PUNCT_VOCAB_FILE = os.path.join("punctuations")
+WORD_VOCAB_FILE = "vocabulary_biRNN" 
+PUNCT_VOCAB_FILE = "punctuations_biRNN"
 
 EOS_TOKENS = {".PERIOD", "?QUESTIONMARK", "!EXCLAMATIONMARK"}
+
 
 def iterable_to_dict(arr):
     return dict((x.strip(), i) for (i, x) in enumerate(arr))
 
-def read_vocabulary(file_name): #
+def read_vocabulary(file_name):
     with codecs.open(file_name, 'r', 'utf-8') as f:
         vocabulary = f.readlines()
         #print('Vocabulary "%s" size: %d' % (file_name, len(vocabulary)))
@@ -52,7 +49,8 @@ def weights_Glorot(i, o, name, rng, is_logistic_sigmoid=False, keepdims=False):
         d *= 4.
     return tf.Variable(tf.random.uniform(_get_shape(i, o, keepdims), -d, d))
 
-def load(file_path, x, p=None): #
+def load(file_path, x, p=None): 
+    print(file_path)
     with open(file_path, 'rb') as f:
         state = pickle.load(f)
         
