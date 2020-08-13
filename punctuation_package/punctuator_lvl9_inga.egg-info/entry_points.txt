@@ -1,0 +1,3 @@
+[console_scripts]
+punctuate = punct.main:main
+

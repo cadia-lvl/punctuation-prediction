@@ -1,0 +1,12 @@
+README.md
+setup.py
+punct/__init__.py
+punct/api.py
+punct/main.py
+punct/models.py
+punctuator_lvl9_inga.egg-info/PKG-INFO
+punctuator_lvl9_inga.egg-info/SOURCES.txt
+punctuator_lvl9_inga.egg-info/dependency_links.txt
+punctuator_lvl9_inga.egg-info/entry_points.txt
+punctuator_lvl9_inga.egg-info/requires.txt
+punctuator_lvl9_inga.egg-info/top_level.txt
