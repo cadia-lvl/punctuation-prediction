@@ -32,7 +32,7 @@ sed -re 's:\(+[^)]*?\)+: :g' -e 's:\[[^]]*?\]: :g' \
 -e 's:–|--:-:g' \
 -e 's/([;:,]) -/\1/g' -e 's:([^ .,:;?!-]+) ([.,:;?! -]+)([.,:;?!-]):\1 \3:g' \
 -e 's:^[^A-Za-z0-9]+::' -e 's:"::g' \
--e '/^[^A-Za-z]*$/d' -e 's/[^A-Za-z0-9 .,:;\?\!$#@%&°\x27\/-]/ /g' -e 's/ +/ /g' \
+-e '/^[^A-Za-z]*$/d' -e 's/[^[:print:]]//g' -e 's/ +/ /g' \
 > $datadir/ep_cleaned.txt
 
 echo "Now the data can be formatted for training using preprocess.py"
