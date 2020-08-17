@@ -89,7 +89,7 @@ sbatch \
 --output=${DATA_DIR}/pt_${input}_bert_$d.log \
 --gres=gpu:5 --mem=28G --time=0-12:00 \
 --wrap="srun \
-python3 transformers/examples/token-classification/run_ner.py \
+python3 run_punctuation.py \
 --data_dir ${DATA_DIR}/ \
 --labels ${DATA_DIR}/labels.txt \
 --model_name_or_path $BERT_MODEL \
