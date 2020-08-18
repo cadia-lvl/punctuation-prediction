@@ -36,7 +36,7 @@ from transformers import (
     TrainingArguments,
     set_seed,
 )
-from utils_ner import NerDataset, Split, get_labels
+from utils_punctuation import NerDataset, Split, get_labels
 
 
 logger = logging.getLogger(__name__)
