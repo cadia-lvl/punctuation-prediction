@@ -142,7 +142,7 @@ def punctuate_text(
     model,
 ):
 
-    i = 1
+    i = 0
     output_list = [input_text[0].title()]
     while True:
 
@@ -263,15 +263,18 @@ def punctuate_electra(input_text, model_type="ELECTRA", format="inline"):
     input_list = read_input(input_text, format).split()
 
     # split up long lines to not exceed the training sequence length
+
     n = 80
     text_to_punctuate = []
     if len(input_list) > n:
-        line_part = [" ".join(l[x : x + n]) for x in range(0, len(l), n)]
+        line_part = [
+            " ".join(input_list[x : x + n]) for x in range(0, len(input_list), n)
+        ]
         text_to_punctuate.extend(line_part)
-    elif len(l) == 0:
+    elif len(input_list) == 0:
         pass
     else:
-        text_to_punctuate.append(clean_text)
+        text_to_punctuate.extend(input_list)
 
     punctuated_text = []
     for t in text_to_punctuate:
