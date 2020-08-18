@@ -206,12 +206,14 @@ def punctuate_biRNN(input_text, model_type="biRNN", format="inline"):
 
     if format == "file":
         lines = []
-        for line in input_text.read():
-            text = [w for w in line.split() if w not in punctuation_vocabulary] + [END]
+        for line in input_text:
+            text = [w for w in line.split(" ") if w not in punctuation_vocabulary] + [
+                END
+            ]
             lines.append(text)
         text_to_punctuate = [val for sublist in lines for val in sublist]
     else:
-        text_to_punctuate = input_text.read().split() + [END]
+        text_to_punctuate = input_text.split() + [END]
 
     punctuated_list = punctuate_text(
         word_vocabulary,
@@ -231,7 +233,6 @@ def punctuate_biRNN(input_text, model_type="biRNN", format="inline"):
 
     punctuated_text = (
         "".join([token for token in punctuated_list]).strip().replace(" </S>", "")
-        + "\n"
     )
 
     return punctuated_text
@@ -261,10 +262,13 @@ def punctuate_electra(input_text, model_type="ELECTRA", format="inline"):
 
     text_to_punctuate = []
     # with open(input_text, "r") as ifile:
-    clean_text = strip_string(
-        input_text.read().replace("\n", " ")
-    )  # Get rid of non-printable characters
-    input_text.close()
+    if format == "file":
+        clean_text = strip_string(
+            input_text.read().replace("\n", " ")
+        )  # Get rid of non-printable characters
+        input_text.close()
+    else:
+        clean_text = strip_string(input_text)
     l = clean_text.split()
     # split up long lines to not exceed the training sequence length
     n = 80
@@ -288,7 +292,7 @@ def punctuate_electra(input_text, model_type="ELECTRA", format="inline"):
         line_punctuated = iterate(tokens, predictions, eos_punct, punctuation_dict)
         punctuated_text.append(line_punctuated)
 
-    return upcase_first_letter(" ".join(punctuated_text) + "\n")
+    return upcase_first_letter(" ".join(punctuated_text))
 
 
 def iterate(tokens, predictions, eos_punct, punctuation_dict):
@@ -320,13 +324,11 @@ def iterate(tokens, predictions, eos_punct, punctuation_dict):
 
 def punctuate(input_path, model_type="biRNN", format="inline"):
     """Punctuate the input text"""
-    if model_type == "ELECTRA":
+    if model_type.lower() == "electra":
         punctuated_text = punctuate_electra(
-            input_path, model_type="ELECTRA", format="inline"
+            input_path, model_type="ELECTRA", format=format
         )
     else:
-        punctuated_text = punctuate_biRNN(
-            input_path, model_type="biRNN", format="inline"
-        )
+        punctuated_text = punctuate_biRNN(input_path, model_type="biRNN", format=format)
 
     return punctuated_text
