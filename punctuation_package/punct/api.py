@@ -46,6 +46,16 @@ def strip_string(string):
     return "".join([c for c in string if unicodedata.category(c) in allowed_categories])
 
 
+def read_input(input_text, format):
+    """Read the input file or string and clean of non-printable characters"""
+    if format == "file":
+        clean_text = strip_string(input_text.read().replace("\n", " "))
+        input_text.close()
+    else:
+        clean_text = strip_string(input_text)
+    return clean_text
+
+
 def to_array(arr, dtype=np.int32):
     # minibatch of 1 sequence as column
     return np.array([arr], dtype=dtype).T
@@ -132,8 +142,8 @@ def punctuate_text(
     model,
 ):
 
-    i = 0
-    output_list = []
+    i = 1
+    output_list = [input_text[0].title()]
     while True:
 
         subsequence = input_text[i : i + MAX_SEQUENCE_LEN]
@@ -167,7 +177,6 @@ def punctuate_text(
         else:
             step = len(subsequence) - 1
 
-        output_list.append(subsequence[0].title())
         for j in range(step):
             output_list.append(
                 convert_punctuation_to_readable(punctuations[j]) + " "
@@ -204,17 +213,8 @@ def punctuate_biRNN(input_text, model_type="biRNN", format="inline"):
     punctuation_vocabulary = net.y_vocabulary
     reverse_punctuation_vocabulary = {v: k for k, v in net.y_vocabulary.items()}
 
-    if format == "file":
-        lines = []
-        for line in input_text:
-            text = [w for w in line.split(" ") if w not in punctuation_vocabulary] + [
-                END
-            ]
-            lines.append(text)
-        text_to_punctuate = [val for sublist in lines for val in sublist]
-    else:
-        text_to_punctuate = input_text.split() + [END]
-
+    # Read the input
+    text_to_punctuate = read_input(input_text, format).split() + [END]
     punctuated_list = punctuate_text(
         word_vocabulary,
         punctuation_vocabulary,
@@ -222,7 +222,6 @@ def punctuate_biRNN(input_text, model_type="biRNN", format="inline"):
         text_to_punctuate,
         net,
     )
-
     for i in range(len(punctuated_list) - 1, 1, -1):
         if punctuated_list[i - 1] == "</S>" and punctuated_list[i] in [
             ". ",
@@ -260,19 +259,13 @@ def punctuate_electra(input_text, model_type="ELECTRA", format="inline"):
 
     labels = config.id2label
 
-    text_to_punctuate = []
-    # with open(input_text, "r") as ifile:
-    if format == "file":
-        clean_text = strip_string(
-            input_text.read().replace("\n", " ")
-        )  # Get rid of non-printable characters
-        input_text.close()
-    else:
-        clean_text = strip_string(input_text)
-    l = clean_text.split()
+    # Read the input and clean of non-printable characters
+    input_list = read_input(input_text, format).split()
+
     # split up long lines to not exceed the training sequence length
     n = 80
-    if len(l) > n:
+    text_to_punctuate = []
+    if len(input_list) > n:
         line_part = [" ".join(l[x : x + n]) for x in range(0, len(l), n)]
         text_to_punctuate.extend(line_part)
     elif len(l) == 0:
