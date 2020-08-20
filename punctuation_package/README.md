@@ -1,7 +1,7 @@
 # README
 
 # Punctuation Prediction 
-A python package that punctuates Icelandic text. The input data is unpunctuated text and punctuated text is returned. The user can choose between three different punctuation models, an ELECTRA Transformer, a seq2seq Transformer and a bidirectional RNN ([Punctuator 2](www.github.com/ottokart/punctuator2)) in Tensorflow 2. We've written a paper on this topic and sent it to Interspeech. TODO: Add link to paper if it gets published.
+A python package that punctuates Icelandic text. The input data is unpunctuated text and punctuated text is returned. The user can choose between three different punctuation models, an ELECTRA Transformer, a seq2seq Transformer and a bidirectional RNN ([Punctuator 2](www.github.com/ottokart/punctuator2)) in Tensorflow 2.
 
 # Table of Contents
 - [Installation](#installation)
@@ -30,11 +30,12 @@ The transformer models are created with PyTorch, which is needed when reading th
 ```pip install torch```
 
 To use the ELECTRA model one needs access to Hugging Face functions, installed with:
+
 ```pip install transformers```
 
 Then finally, run:
 
-```pip install lvl-punctuator```
+```pip install punctuator-ice```
 
 # Running
 
@@ -46,7 +47,7 @@ To run it on a command line:
 
 The default model is the *biRNN* model, you can also specify another model, e.g.:
 
-```$ punctuate input.txt output.txt "ELECTRA"```
+```$ punctuate input.txt output.txt --electra```
 
 The input uses `stdin` and the output `stdout`. Both files are encoded in UTF-8. 
 
@@ -72,10 +73,7 @@ In this case, the default model is used. An input string is specified and the pu
 $ echo "næsti fundur er fyrirhugaður í næstu viku að sögn kristínar jónsdóttur hópstjóra náttúruvárvöktunar hjá veðurstofu íslands verður áfram fylgst grannt með jarðhræringum á svæðinu" | punctuate
 $ Næsti fundur er fyrirhugaður í næstu viku. Að sögn kristínar jónsdóttur, hópstjóra náttúruvöktunar hjá veðurstofu íslands, verður áfram fylgst grannt með jarðhræringum á svæðinu.
 ```
-The --seq2seq model also capitalizes proper nouns. This is an example output of that:
-```
-$ Næsti fundur er fyrirhugaður í næstu viku. Að sögn Kristínar Jónsdóttur, hópstjóra náttúruvöktunar hjá Veðurstofu Íslands, verður áfram fylgst grannt með jarðhræringum á svæðinu.
-```
+
 
 ## Python module
 
@@ -91,6 +89,7 @@ punctuated = punctuate(s, model='biRNN')
 
 print(punctuated)
 ```
+
 The program should output:
 ```
 Næsti fundur er fyrirhugaður í næstu viku. Að sögn kristínar jónsdóttur, hópstjóra náttúruvöktunar hjá veðurstofu íslands, verður áfram fylgst grannt með jarðhræringum á svæðinu.

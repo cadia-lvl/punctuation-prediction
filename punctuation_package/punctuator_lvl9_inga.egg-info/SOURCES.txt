@@ -1,9 +1,9 @@
 README.md
 setup.py
-punct/__init__.py
-punct/api.py
-punct/main.py
-punct/models.py
+punctuator/__init__.py
+punctuator/api.py
+punctuator/main.py
+punctuator/models.py
 punctuator_lvl9_inga.egg-info/PKG-INFO
 punctuator_lvl9_inga.egg-info/SOURCES.txt
 punctuator_lvl9_inga.egg-info/dependency_links.txt

@@ -1,3 +1,3 @@
 [console_scripts]
-punctuate = punct.main:main
+punctuate = punctuator.main:main
 

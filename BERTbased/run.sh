@@ -23,10 +23,10 @@ if [ "$input" = "rmh" ]; then
     # This is the path where the original data is, after processing with process/rmh_data_cleaning.sh
     orig=./data/processed/rmh
     # This is the path where the processed data is created and then stored, update it to where you want to see your data
-    export DATA_DIR=$orig/NERtrans
+    export DATA_DIR=$orig/punctuation-bert
     elif [ "$input" = "ep" ]; then
     orig=./data/processed/ep
-    export DATA_DIR=$orig/NERtrans
+    export DATA_DIR=$orig/punctuation-bert
 else
     echo "Unrecognized input."
 fi
@@ -35,7 +35,6 @@ mkdir -p $tmp
 d=$(date +'%Y%m%d')
 
 error_calc_dir=utils
-export SCRIPT_DIR=transformers/examples/token-classification
 export MAX_LENGTH=60
 export MAX_SEQ_LENGTH=180
 export BERT_MODEL=bert-base-multilingual-cased
@@ -85,11 +84,11 @@ fi
 
 echo "Fine-tune the model"
 sbatch \
---job-name=${input}-NER-bert \
+--job-name=${input}-bert \
 --output=${DATA_DIR}/pt_${input}_bert_$d.log \
 --gres=gpu:5 --mem=28G --time=0-12:00 \
 --wrap="srun \
-python3 run_punctuation.py \
+python3 BERTbased/run_punctuation.py \
 --data_dir ${DATA_DIR}/ \
 --labels ${DATA_DIR}/labels.txt \
 --model_name_or_path $BERT_MODEL \

@@ -6,7 +6,7 @@ set -o pipefail
 # Problematic! Can't run all at once. Need to rename each file to test.txt and put in $DATA_DIR
 # and afterwards rename the output and put in a different dir
 
-input=$1
+language=$1
 datadir=$2
 outdir=$3
 
@@ -43,7 +43,7 @@ echo "Get the data on the right format"
 for p in 5 10 15 20; do
     (
         sed -re 's/[^A-Za-z0-9 .,:;\?\!$#@%&°\x27\/<>\-]/ /g' -e 's/ +/ /g' -e 's: ([\.,\?\!\:\;\-][A-Z]{4,}):\1:g' \
-        < $origwertestdir/wer${p}perc.${input}.txt | tr ' ' '\n' \
+        < $origwertestdir/wer${p}perc.${language}.txt | tr ' ' '\n' \
         | sed -re 's:([\.,\?\!\:\;\-][A-Z]{4,}): \1:g' \
         -e 's:\-DASH|\:COLON:COMMA:g' \
         -e 's:\;SEMICOLON|\!EXCLAMATIONMARK:PERIOD:g' \
@@ -53,7 +53,7 @@ for p in 5 10 15 20; do
         | cut -d' ' -f1,2 \
         | egrep -v '^ |^$' \
         | awk -F' ' '{if ($2 == "") print $1,"O"; else print $0}' \
-        > $tmp/wer${p}perc.${input}.txt.tmp
+        > $tmp/wer${p}perc.${language}.txt.tmp
     ) &
 done
 wait
@@ -61,24 +61,23 @@ wait
 # Split the data.
 for p in 5 10 15 20; do
     (
-        awk -v m=$MAX_LENGTH ' {print;} NR % m == 0 { print ""; }' $tmp/wer${p}perc.${input}.txt.tmp > $wertest/wer${p}perc.${input}.txt
+        awk -v m=$MAX_LENGTH ' {print;} NR % m == 0 { print ""; }' $tmp/wer${p}perc.${language}.txt.tmp > $wertest/wer${p}perc.${language}.txt
     ) &
 done
 
 # NOTE! The following needs to be run one at a time
 p=5
 rm ${DATA_DIR}/cached_test_bert-base-multilingual-cased_256.tf_record
-cp $wertest/wer${p}perc.${input}.txt ${DATA_DIR}/test.txt
+cp $wertest/wer${p}perc.${language}.txt ${DATA_DIR}/test.txt
 max_eval_length=256
 sbatch \
---job-name=test_pred_${input}_${p}wer \
---output=${DATA_DIR}/tf_${input}_transformer_${d}_pred_${p}wer.log \
+--job-name=test_pred_${language}_${p}wer \
+--output=${DATA_DIR}/tf_${language}_transformer_${d}_pred_${p}wer.log \
 --gres=gpu:1 --mem=4G \
 --time=0-08:00 \
 --wrap="srun \
-python3 ${SCRIPT_DIR}/run_tf_ner.py \
+python3 BERTbased/run_punctuation.py \
 --data_dir ${DATA_DIR}/ \
---model_type bert \
 --labels ${DATA_DIR}/labels.txt \
 --model_name_or_path $BERT_MODEL \
 --output_dir $OUTPUT_DIR \
@@ -100,7 +99,7 @@ sed -re 's: O$::' -e 's:COMMA:,COMMA:' \
 > $wertestout/test_predictions_punct2_style_${p}wer.txt
 
 sed -r 's/[^A-Za-z0-9 .,:;\?\!$#@%&°\x27\/<>\-]/ /g' -e 's/ +/ /g' \
-< $origwertestdir/wer${p}perc.${input}.txt > $tmp/${p}wer.tmp
+< $origwertestdir/wer${p}perc.${language}.txt > $tmp/${p}wer.tmp
 
 echo 'Calculate F1-scores'
 python $error_calc_dir/error_calculator.py \

@@ -1,1 +1,1 @@
-punct
+punctuator
