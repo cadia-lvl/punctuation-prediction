@@ -2,10 +2,11 @@ import os
 import sys
 import logging
 import unicodedata
+import argparse
 
 import numpy as np
 import torch
-from transformers import AutoConfig, ElectraTokenizer, ElectraForTokenClassification
+from transformers import AutoConfig, AutoTokenizer, AutoModelForTokenClassification
 
 logging.basicConfig(level=logging.INFO)
 
@@ -63,9 +64,9 @@ def punctuate(input_text, model_path):
     """Punctuate the input text with the ELECTRA model. Capitalize sentence beginnings."""
 
     config = AutoConfig.from_pretrained(model_path)
-    tokenizer = ElectraTokenizer.from_pretrained(model_path)
+    tokenizer = AutoTokenizer.from_pretrained(model_path)
     tokenizer.add_tokens(["<NUM>"])
-    pytorch_model = ElectraForTokenClassification.from_pretrained(model_path)
+    pytorch_model = AutoModelForTokenClassification.from_pretrained(model_path)
 
     punctuation_dict = {
         "COMMA": ",",
@@ -109,6 +110,14 @@ def punctuate(input_text, model_path):
 
 
 if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(
+        description="""Use a BERT like transformer, fine tuned for punctuation prediction, to insert punctuations into the input text.
+        Usage: python predict.py <model-path> <input-file> <output-file>
+            E.g. python predict.pu out/punctuation/electra input.txt output.txt
+        """
+    )
+    args = parser.parse_args()
 
     if len(sys.argv) > 1:
         model_path = os.path.abspath(sys.argv[1])

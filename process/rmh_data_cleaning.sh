@@ -2,23 +2,29 @@
 
 set -o pipefail
 
-# RMH data cleaning for punctuation training
-# NOTE! Created to fit with the punctuator 2 data processing
-# but added afterwards cleaning for transformer training
-# NOTE! A list of proper nouns needs to come from somewhere (words only used capitalized).
-# Or a better true casing needs to be implemented
-
+if [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ $# -lt 2 ]; then
+    echo "RMH data cleaning for punctuation training"
+    echo "NOTE! Created to fit with the punctuator 2 data processing"
+    echo "but added afterwards cleaning for transformer training."
+    echo "NOTE! A list of proper nouns needs to come from somewhere (words only used capitalized)"
+    echo "or a better true casing needs to be implemented."
+    echo "The script takes in a data directory containing the text files obtained with rmh_subset_specific.ipynb."
+    echo "It also takes in an output directory"
+    echo ""
+    echo "Usage: $0 <data-dir> <output-dir>"
+    echo " e.g.: $0 data/rmh/raw data/rmh/processed"
+    echo ""
+    exit 1;
+fi
 # This is the path where the original data is. You have to change this to where your data is
-orig=./data/rmh
-datadir=./data/processed/rmh
+orig=$1
+datadir=$2
 tmp=$datadir/tmp
 log=$datadir/log
 seq2seq=$datadir/seq2seq
 max_len=60 # for seq2seq data
 
 mkdir -p $tmp $log $seq2seq
-
-conda activate tf21env
 
 echo "Clean the data by removing and rewriting lines using sed regex"
 # 1. Remove …„“”\"|«»‘*_<>●,, and trailing spaces

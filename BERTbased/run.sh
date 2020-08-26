@@ -6,42 +6,45 @@ set -o pipefail
 # https://github.com/huggingface/transformers/tree/master/examples/token-classification
 # The Icelandic Gigaword corpus data is obtained with ../process/rmh_subset_specific.ipynb
 # and cleaned with rmh_data_cleaning.sh
-# The English Europarl data is obtained and cleaned with ../process/europarl_cleaning.sh
+# The English Europarl data is obtained from https://www.statmt.org/europarl/ and cleaned with ../process/europarl_cleaning.sh
 
-conda activate ptenv
-
-# git clone https://github.com/huggingface/transformers
-cd transformers
-pip install .
-cd ..
-
-stage=0
-input=rmh  #ep
+stage=-1
 do_wer_tests=false
 
-if [ "$input" = "rmh" ]; then
-    # This is the path where the original data is, after processing with process/rmh_data_cleaning.sh
-    orig=./data/processed/rmh
-    # This is the path where the processed data is created and then stored, update it to where you want to see your data
-    export DATA_DIR=$orig/punctuation-bert
-    elif [ "$input" = "ep" ]; then
-    orig=./data/processed/ep
-    export DATA_DIR=$orig/punctuation-bert
-else
-    echo "Unrecognized input."
+if [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ $# -lt 2 ]; then
+    echo "This script fine tunes a PyTorch transformer to a punctuation prediction task using the Hugging Face library,"
+    echo "as explaned here: https://github.com/huggingface/transformers/tree/master/examples/token-classification."
+    echo "run_punctuation.py is barely changed from run_ner.py on that Github page."
+    echo "It takes in a path to processed train, dev and test sets. These data sets have been processed using"
+    echo "either rmh_data_cleaning.shor europarl_cleaning.sh in the process directory."
+    echo "The script also takes in the language used, e.g. en for English and what pre-trained model to use."
+    echo "It can either be a string signifying a model on Hugging-Face, e.g. bert-base-cased, or a path to a directory"
+    echo "on your server containing a pretrained BERT like model, e.g. /work/inga/punctuation/electra."
+    echo "The final input is an output directory, in which a subdirectory will be created withthe fine-tuned model."
+    echo ""
+    echo "Usage: $0 [options] <data-dir> <language string> <pretrained BERT model> <output-dir>"
+    echo " e.g.: $0 --stage -1 /data/europarl/processed/en en out/punctuation/europarl"
+    echo ""
+    exit 1;
 fi
+
+orig=$1
+language=$2 # in the case of Icelandic can be used for a dataset as well, e.g. rmh or althingi
+pretrained=$3 # e.g. bert-base-multilingual-cased or path to a folder with the model
+outdir=$4
+
+export DATA_DIR=$orig/bert
 tmp=$DATA_DIR/tmp
 mkdir -p $tmp
 d=$(date +'%Y%m%d')
 
-error_calc_dir=utils
 export MAX_LENGTH=60
-export MAX_SEQ_LENGTH=180
-export BERT_MODEL=bert-base-multilingual-cased
-export OUTPUT_DIR=.out/BERTbased-out/$input-transformer-model
+export MAX_SEQ_LENGTH=128
+export BERT_MODEL=$pretrained #bert-base-multilingual-cased
+export OUTPUT_DIR=$outdir/bert-out/$language-$(basename $pretrained)-len$MAX_LENGTH-$d
 export BATCH_SIZE=16
-export NUM_EPOCHS=3
-export SAVE_STEPS=3000
+export NUM_EPOCHS=4
+export SAVE_STEPS=1000
 export SEED=42
 
 if [ $stage -le -1 ]; then
@@ -56,7 +59,7 @@ if [ $stage -le -1 ]; then
     for i in train dev test; do
         (
             sed -re 's/[^A-ZÁÐÉÍÓÚÝÞÆÖa-záðéíóúýþæö0-9 .,:;\?\!$#@%&°\x27\/<>\-]/ /g' -e 's/ +/ /g' -e 's: ([\.,\?\!\:\;\-][A-Z]{4,}):\1:g' \
-            < $orig/${input}.${i}.txt | tr ' ' '\n' \
+            < $orig/${language}.${i}.txt | tr ' ' '\n' \
             | sed -re 's:([\.,\?\!\:\;\-][A-Z]{4,}): \1:g' \
             -e 's:\;SEMICOLON|\-DASH|\:COLON:COMMA:g' \
             -e 's:\!EXCLAMATIONMARK:PERIOD:g' \
@@ -84,9 +87,9 @@ fi
 
 echo "Fine-tune the model"
 sbatch \
---job-name=${input}-bert \
---output=${DATA_DIR}/pt_${input}_bert_$d.log \
---gres=gpu:5 --mem=28G --time=0-12:00 \
+--job-name=${language}-bert \
+--output=${DATA_DIR}/${language}_bert_$d.log \
+--gres=gpu:3 --mem=28G --time=0-12:00 \
 --wrap="srun \
 python3 BERTbased/run_punctuation.py \
 --data_dir ${DATA_DIR}/ \
@@ -108,19 +111,18 @@ python3 BERTbased/run_punctuation.py \
 # -e 's:QUESTIONMARK:\?QUESTIONMARK:' \
 # -e 's:PERIOD:.PERIOD:' \
 # < $OUTPUT_DIR/test_predictions.txt \
-# | tr '\n' ' ' | sed -r 's: +: :g' \
 # > $OUTPUT_DIR/test_predictions_theano_style.txt
 
 # echo 'Calculate F1-scores'
-# python $error_calc_dir/error_calculator.py \
-# <( sed -re 's/[^A-ZÁÐÉÍÓÚÝÞÆÖa-záðéíóúýþæö0-9 .,:;\?\!$#@%&°\x27\/<>\-]/ /g' -e 's/ +/ /g' $orig/${input}.test.txt) \
+# python utils/error_calculator.py \
+# <( sed -re 's/[^A-ZÁÐÉÍÓÚÝÞÆÖa-záðéíóúýþæö0-9 .,:;\?\!$#@%&°\x27\/<>\-]/ /g' -e 's/ +/ /g' $orig/*.test.txt) \
 # $OUTPUT_DIR/test_predictions_theano_style.txt \
 # > $OUTPUT_DIR/test_punct2error.txt
 
 # NOTE! The following can't be run like this. Need to find another way
 # if [ $do_wer_tests = "true" ]; then
 #     echo 'Apply the model on text with different WER inserted'
-#     bash wer-test.sh $input $DATA_DIR $OUTPUT_DIR
+#     bash wer-test.sh $language $DATA_DIR $OUTPUT_DIR
 # fi
 
 exit 0;

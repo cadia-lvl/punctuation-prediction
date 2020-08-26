@@ -5,14 +5,29 @@ set -o pipefail
 # Europarl data cleaning for punctuator2 training
 # NOTE! Preprocessing for fairseq seq2seq transformer training added below
 
-datadir=data/processed/ep
-mkdir -p $datadir
-if [ ! -d europarl ]; then
-    wget -qO- http://hltshare.fbk.eu/IWSLT2012/training-monolingual-europarl.tgz data | tar xvz
-    mv training-monolingual-europarl europarl
+if [ "$1" = "-h" ] || [ "$1" = "--help" ] || [ $# -lt 2 ]; then
+    echo "This script cleanes European parliament texts for use with Punctuator 2."
+    echo "Training and evaluation sequences for Fairseq sequence-to-sequence training can also be created."
+    echo "It takes in the textfile to be processed, a directory and a language tag. From the latter two"
+    echo "the output directory is created, e.g. from 'out/punctuation' and 'en' we get the output dir 'out/punctuation/en"
+    echo ""
+    echo "Usage: $0 <textfile> <output-dir> <language tag>"
+    echo " e.g.: $0 data/europarl/raw/europarl-v7.de-en.en en data/europarl/processed"
+    echo ""
+    exit 1;
 fi
 
-conda activate tf21env
+origfile=$1
+processed=$2
+language=$3
+datadir=$processed/$language
+mkdir -p $datadir
+
+# The English text we used:
+#if [ ! -d europarl ]; then
+#    wget -qO- http://hltshare.fbk.eu/IWSLT2012/training-monolingual-europarl.tgz data | tar xvz
+#    mv training-monolingual-europarl europarl
+#fi
 
 echo "Clean the data by removing and rewriting lines using sed regex"
 # 1. All grep commands come from Ottokar. He ignores lines with these patterns
@@ -22,7 +37,7 @@ echo "Clean the data by removing and rewriting lines using sed regex"
 # 5. Remove hyphen after [;:,] and deal with multiple punctuation after words/numbers
 # 6. Remove symbols other than letters or numbers at line beginnings and remove " and ' (latter around puncts)
 # 7. Remove lines which don't contain letters, remove symbols listed in middle and change to one space between words.
-grep -v " '[^ ]" data/europarl/europarl-v7.en | \
+grep -v " '[^ ]" $origfile | \
 grep -v \'\ s\   | \
 grep -v \'\ ll\  | \
 grep -v \'\ ve\  | \
@@ -58,56 +73,56 @@ for f in $datadir/ep.*.txt ; do grep -o :COLON $f | wc -l; done
 for f in $datadir/ep.*.txt ; do grep -o \;SEMICOLON $f | wc -l; done
 for f in $datadir/ep.*.txt ; do grep -o "\-DASH" $f | wc -l; done
 
-echo "Make a special dataset which fits for a seq2seq transformer training"
-echo "and can be used to learn both punctuation and capitalization"
-# For a transformer training I don't want to have the punctuation stuck against the punctuation token
-# since that gets scrambled when tokenize. Remove the < and > symbols around number tokens
-# I want to try a sequence to sequence training which also learns to capitalize the text so I use the
-# original one which I have not changed the casing of
-# Maybe I should have skipped running this through preprocess.py but since it is already done
-# I will do the following:
-echo "Remove line breaks and create segments of length $max_len"
-tmp=$datadir/seq2seq/tmp
-mkdir -p $tmp
-max_len=60 # for seq2seq data
-for n in train dev test; do
-    tr '\n' ' ' < ep.$n.txt \
-    | awk -v m=$max_len '
-    {
-        n = split($0, a, " ")
-        for (i=1; i<=n; i++)
-            {
-                printf "%s ",a[i]
-                if (i % m == 0) {print ""}
-            }
-    }
-    ' > $tmp/ep.$n.puncts.seq &
-done
+# echo "Make a special dataset which fits for a seq2seq transformer training"
+# echo "and can be used to learn both punctuation and capitalization"
+# # For a transformer training I don't want to have the punctuation stuck against the punctuation token
+# # since that gets scrambled when tokenize. Remove the < and > symbols around number tokens
+# # I want to try a sequence to sequence training which also learns to capitalize the text so I use the
+# # original one which I have not changed the casing of
+# # Maybe I should have skipped running this through preprocess.py but since it is already done
+# # I will do the following:
+# echo "Remove line breaks and create segments of length $max_len"
+# tmp=$datadir/fairseq/tmp
+# mkdir -p $tmp
+# max_len=60 # for fairseq data
+# for n in train dev test; do
+#     tr '\n' ' ' < ep.$n.txt \
+#     | awk -v m=$max_len '
+#     {
+#         n = split($0, a, " ")
+#         for (i=1; i<=n; i++)
+#             {
+#                 printf "%s ",a[i]
+#                 if (i % m == 0) {print ""}
+#             }
+#     }
+#     ' > $tmp/ep.$n.puncts.seq &
+# done
 
-for n in train dev test; do
-    # Create an input text without punctuation tokens
-    if [ ! -f "seq2seq/ep.$n.nopuncts" ]; then
-        sed -re 's:[.,;:?\!-][A-Z]{4,}::g' \
-        -e 's:[<>]::g' \
-        -e 's:^[^A-ZÁÐÉÍÓÚÝÞÆÖa-záðéíóúýþæö0-9]+::' -e 's: $::' \
-        < $tmp/ep.$n.puncts.seq \
-        > $datadir/seq2seq/ep.$n.nopuncts &
-    fi
-    
-    # Create an output text with 'no-special-symbol' punctuation tokens
-    if [ ! -f "seq2seq/ep.$n.puncts" ]; then
-        sed -re 's:[.,;:?\!-]([A-Z]{4,}):\1:g' \
-        -e 's:[<>]::g' \
-        -e 's:^[^A-ZÁÐÉÍÓÚÝÞÆÖa-záðéíóúýþæö0-9]+::' \
-        -e 's: $::' \
-        -e 's:\bDASH\b|\bCOLON\b:COMMA:g' \
-        -e 's:\bSEMICOLON\b|\bEXCLAMATIONMARK\b:PERIOD:g' \
-        -e 's:^(PERIOD|COMMA|QUESTIONMARK) ::' \
-        < $tmp/ep.$n.puncts.seq \
-        > $datadir/seq2seq/ep.$n.puncts &
-    fi
-done
+# for n in train dev test; do
+#     # Create an input text without punctuation tokens
+#     if [ ! -f "fairseq/ep.$n.nopuncts" ]; then
+#         sed -re 's:[.,;:?\!-][A-Z]{4,}::g' \
+#         -e 's:[<>]::g' \
+#         -e 's:^[^A-ZÁÐÉÍÓÚÝÞÆÖa-záðéíóúýþæö0-9]+::' -e 's: $::' \
+#         < $tmp/ep.$n.puncts.seq \
+#         > $datadir/fairseq/ep.$n.nopuncts &
+#     fi
 
-echo "Preprocessing done for fairseq translational transformer training. Next step is running run-seq2seq-transformer.sh"
+#     # Create an output text with 'no-special-symbol' punctuation tokens
+#     if [ ! -f "fairseq/ep.$n.puncts" ]; then
+#         sed -re 's:[.,;:?\!-]([A-Z]{4,}):\1:g' \
+#         -e 's:[<>]::g' \
+#         -e 's:^[^A-ZÁÐÉÍÓÚÝÞÆÖa-záðéíóúýþæö0-9]+::' \
+#         -e 's: $::' \
+#         -e 's:\bDASH\b|\bCOLON\b:COMMA:g' \
+#         -e 's:\bSEMICOLON\b|\bEXCLAMATIONMARK\b:PERIOD:g' \
+#         -e 's:^(PERIOD|COMMA|QUESTIONMARK) ::' \
+#         < $tmp/ep.$n.puncts.seq \
+#         > $datadir/fairseq/ep.$n.puncts &
+#     fi
+# done
+
+# echo "Preprocessing done for fairseq translational transformer training. Next step is running run-seq2seq-transformer.sh"
 
 exit 0;
