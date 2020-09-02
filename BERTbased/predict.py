@@ -8,7 +8,41 @@ import numpy as np
 import torch
 from transformers import AutoConfig, AutoTokenizer, AutoModelForTokenClassification
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARNING)
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(
+        description="""Use a BERT like transformer, fine tuned for punctuation prediction, to insert punctuations into the input text.\n
+        Usage: python predict.py <model-path> <input-file> <output-file>\n
+            E.g. python predict.py out/punctuation/electra input.txt output.txt
+        """
+    )
+    parser.add_argument(
+        "model_path", type=dir_path, help="Path to punctuation model directory",
+    )
+    parser.add_argument(
+        "infile", type=file_path, help="UTF-8 text file to punctuate",
+    )
+    parser.add_argument(
+        "outfile", type=str, help="Punctuated output text file",
+    )
+    return parser.parse_args()
+
+
+def dir_path(path):
+    if os.path.isdir(path):
+        return path
+    else:
+        raise argparse.ArgumentTypeError(f"readable_dir:{path} is not a valid path")
+
+
+def file_path(path):
+    if os.path.isfile(path):
+        return path
+    else:
+        raise argparse.ArgumentTypeError(f"readable_file:{path} is not a valid file")
+
 
 # Electra had difficulties with non-printable symbols in text
 # https://stackoverflow.com/questions/41757886/how-can-i-recognise-non-printable-unicode-characters-in-python
@@ -109,36 +143,18 @@ def punctuate(input_text, model_path):
     return upcase_first_letter(" ".join(punctuated_text))
 
 
-if __name__ == "__main__":
+def main():
+    args = parse_arguments()
 
-    parser = argparse.ArgumentParser(
-        description="""Use a BERT like transformer, fine tuned for punctuation prediction, to insert punctuations into the input text.
-        Usage: python predict.py <model-path> <input-file> <output-file>
-            E.g. python predict.pu out/punctuation/electra input.txt output.txt
-        """
-    )
-    args = parser.parse_args()
-
-    if len(sys.argv) > 1:
-        model_path = os.path.abspath(sys.argv[1])
-    else:
-        sys.exit(
-            "'Model path' argument missing! Should be a directory containing pytorch_model.bin"
-        )
-
-    if len(sys.argv) > 2:
-        input_file = os.path.abspath(sys.argv[4])
-    else:
-        sys.exit("An input textfile is required!")
-
-    if len(sys.argv) > 3:
-        output_file = os.path.abspath(sys.argv[5])
-    else:
-        sys.exit("An output textfile is required!")
-
-    with open(input_file, "r") as f:
+    with open(args.infile, "r") as f:
         # Clean the input file of non-printable characters and split on whitespace
         text = strip_string(f.read().replace("\n", " ")).split()
 
-    with open(output_file, "x") as fout:
-        fout.write(punctuate(text, model_path))
+    punctuated = punctuate(text, args.model_path)
+
+    with open(args.outfile, "w") as fout:
+        fout.write(punctuated)
+
+
+if __name__ == "__main__":
+    main()
