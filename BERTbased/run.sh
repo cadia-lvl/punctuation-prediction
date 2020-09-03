@@ -33,7 +33,7 @@ language=$2 # in the case of Icelandic can be used for a dataset as well, e.g. r
 pretrained=$3 # e.g. bert-base-multilingual-cased or path to a folder with the model
 outdir=$4
 
-export DATA_DIR=$orig/bert
+export DATA_DIR=$orig/bert_multilingual
 tmp=$DATA_DIR/tmp
 mkdir -p $tmp
 d=$(date +'%Y%m%d')
@@ -41,11 +41,12 @@ d=$(date +'%Y%m%d')
 export MAX_LENGTH=60
 export MAX_SEQ_LENGTH=128
 export BERT_MODEL=$pretrained #bert-base-multilingual-cased
-export OUTPUT_DIR=$outdir/bert-out/$language-$(basename $pretrained)-len$MAX_LENGTH-$d
+export OUTPUT_DIR=$outdir/$language-$(basename $pretrained)-len$MAX_LENGTH-$d
 export BATCH_SIZE=16
 export NUM_EPOCHS=4
 export SAVE_STEPS=1000
 export SEED=42
+mkdir -p $OUTPUT_DIR
 
 if [ $stage -le -1 ]; then
     echo "Get the data on the right format"
@@ -59,7 +60,7 @@ if [ $stage -le -1 ]; then
     for i in train dev test; do
         (
             sed -re 's/[^A-ZÁÐÉÍÓÚÝÞÆÖa-záðéíóúýþæö0-9 .,:;\?\!$#@%&°\x27\/<>\-]/ /g' -e 's/ +/ /g' -e 's: ([\.,\?\!\:\;\-][A-Z]{4,}):\1:g' \
-            < $orig/${language}.${i}.txt | tr ' ' '\n' \
+            < $orig/*.${i}.txt | tr ' ' '\n' \
             | sed -re 's:([\.,\?\!\:\;\-][A-Z]{4,}): \1:g' \
             -e 's:\;SEMICOLON|\-DASH|\:COLON:COMMA:g' \
             -e 's:\!EXCLAMATIONMARK:PERIOD:g' \
@@ -88,7 +89,7 @@ fi
 echo "Fine-tune the model"
 sbatch \
 --job-name=${language}-bert \
---output=${DATA_DIR}/${language}_bert_$d.log \
+--output=${OUTPUT_DIR}/${language}_bert_$d.log \
 --gres=gpu:3 --mem=28G --time=0-12:00 \
 --wrap="srun \
 python3 BERTbased/run_punctuation.py \
@@ -106,23 +107,17 @@ python3 BERTbased/run_punctuation.py \
 --do_eval \
 --do_predict"
 
-# # Use the Punctuator2 F1-score calculator
-# sed -re 's: O$::' -e 's:COMMA:,COMMA:' \
-# -e 's:QUESTIONMARK:\?QUESTIONMARK:' \
-# -e 's:PERIOD:.PERIOD:' \
-# < $OUTPUT_DIR/test_predictions.txt \
-# > $OUTPUT_DIR/test_predictions_theano_style.txt
-
-# echo 'Calculate F1-scores'
+# # echo 'Calculate F1-scores the same way as Punctuator 2 for comparison'
+# # This way of calculating the errors does not work unless the length of the two files is the same
+# # I.e. that max sequence length was not reached when tokenizing
 # python utils/error_calculator.py \
-# <( sed -re 's/[^A-ZÁÐÉÍÓÚÝÞÆÖa-záðéíóúýþæö0-9 .,:;\?\!$#@%&°\x27\/<>\-]/ /g' -e 's/ +/ /g' $orig/*.test.txt) \
-# $OUTPUT_DIR/test_predictions_theano_style.txt \
+# ${DATA_DIR}/test.txt $OUTPUT_DIR/test_predictions.txt
 # > $OUTPUT_DIR/test_punct2error.txt
 
-# NOTE! The following can't be run like this. Need to find another way
+# NOTE! The following is an example. Files might be called other names.
 # if [ $do_wer_tests = "true" ]; then
 #     echo 'Apply the model on text with different WER inserted'
-#     bash wer-test.sh $language $DATA_DIR $OUTPUT_DIR
+#     for i in 5 10 15 20; do
+#     pyton predict.py $OUTPUT_DIR $DATA_DIR/wer_tests/wer$i.txt $OUTPUT_DIR/wer_tests/test_predictions_wer$i.txt
+#
 # fi
-
-exit 0;

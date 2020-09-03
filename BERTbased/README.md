@@ -7,4 +7,9 @@ The English Europarl data is obtained from https://www.statmt.org/europarl/ and 
 It is a bit confusing that the cleaning process is for punctuator 2. I should change that.
 
 Install Hugging Face transformers:
-`pip install transformers`
+cd ```
+git clone https://github.com/huggingface/transformers
+cd transformers
+pip install .
+pip install -r ./examples/requirements.txt
+```
