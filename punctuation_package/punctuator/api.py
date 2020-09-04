@@ -244,6 +244,7 @@ def punctuate_electra(input_text, model_type="ELECTRA", format="inline"):
     tokenizer = ElectraTokenizer.from_pretrained(model_type)
     tokenizer.add_tokens(["<NUM>"])
     pytorch_model = ElectraForTokenClassification.from_pretrained(model_type)
+    pytorch_model.resize_token_embeddings(len(tokenizer))
 
     punctuation_dict = {
         "COMMA": ",",

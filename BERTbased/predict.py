@@ -101,6 +101,7 @@ def punctuate(input_text, model_path):
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     tokenizer.add_tokens(["<NUM>"])
     pytorch_model = AutoModelForTokenClassification.from_pretrained(model_path)
+    pytorch_model.resize_token_embeddings(len(tokenizer))
 
     punctuation_dict = {
         "COMMA": ",",
@@ -118,6 +119,7 @@ def punctuate(input_text, model_path):
     # split up long lines to not exceed the training sequence length
     n = 80
     text_to_punctuate = []
+    logging.info(f"input_text length: {len(input_text)}")
     if len(input_text) > n:
         line_part = [
             " ".join(input_text[x : x + n]) for x in range(0, len(input_text), n)
@@ -128,8 +130,10 @@ def punctuate(input_text, model_path):
     else:
         text_to_punctuate.extend(input_text)
 
+    logging.info(f"length of text_to_punctuate: {len(text_to_punctuate)}")
     punctuated_text = []
     for t in text_to_punctuate:
+        logging.info(f"length of t: {len(t.split())}")
         input_ids = tokenizer(t, return_tensors="pt")["input_ids"]
         tokens = tokenizer.tokenize(t)
         predictions = pytorch_model(input_ids)

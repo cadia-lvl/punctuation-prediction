@@ -16,17 +16,18 @@ import sys
 # nltk.download('punkt')
 from nltk.tokenize import word_tokenize
 
-NUM = '<NUM>'
+NUM = "<NUM>"
 
 EOS_PUNCTS = {".": ".PERIOD", "?": "?QUESTIONMARK", "!": "!EXCLAMATIONMARK"}
 INS_PUNCTS = {",": ",COMMA", ";": ";SEMICOLON", ":": ":COLON", "-": "-DASH"}
 
 forbidden_symbols = re.compile(r"[\[\]\(\)\/\\\>\<\=\+\_\*]")
 numbers = re.compile(r"\d")
-multiple_punct = re.compile(r'([\.\?\!\,\:\;\-])(?:[\.\?\!\,\:\;\-]){1,}')
+multiple_punct = re.compile(r"([\.\?\!\,\:\;\-])(?:[\.\?\!\,\:\;\-]){1,}")
 
 
-def is_number(x): return len(numbers.sub("", x)) / len(x) < 0.6
+def is_number(x):
+    return len(numbers.sub("", x)) / len(x) < 0.6
 
 
 def untokenize(line):
@@ -36,7 +37,7 @@ def untokenize(line):
 
 def skip(line):
 
-    if line.strip() == '':
+    if line.strip() == "":
         return True
 
     last_symbol = line[-1]
@@ -70,12 +71,12 @@ def process_line(line):
 
 skipped = 0
 
-with codecs.open(sys.argv[2], 'w', encoding='utf-8') as out_txt:
-    with codecs.open(sys.argv[1], 'r', encoding='utf-8') as text:
+with codecs.open(sys.argv[2], "w", encoding="utf-8") as out_txt:
+    with codecs.open(sys.argv[1], "r", encoding="utf-8") as text:
 
         for line in text:
 
-            line = line.replace("\"", "").strip()
+            line = line.replace('"', "").strip()
             line = multiple_punct.sub(r"\g<1>", line)
 
             if skip(line):
@@ -84,6 +85,6 @@ with codecs.open(sys.argv[2], 'w', encoding='utf-8') as out_txt:
 
             line = process_line(line)
 
-            out_txt.write(line + '\n')
+            out_txt.write(line + "\n")
 
 print("Skipped {} lines".format(skipped))

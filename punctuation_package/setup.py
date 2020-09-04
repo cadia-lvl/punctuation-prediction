@@ -5,7 +5,7 @@ with open("README.md", "r") as readme:
 
 setuptools.setup(
     name="punctuator-ice",
-    version="1.1.1",
+    version="1.1.2",
     author="Helga Svala Sigurðardóttir",
     author_email="helgas@ru.is",
     url="https://github.com/cadia-lvl/punctuation-prediction/tree/master/punctuation_package",
@@ -27,7 +27,7 @@ setuptools.setup(
     ],
     install_requires=[
         "tensorflow >= 2.1.0",
-        "torch >= 1.6.0",
+        "torch >= 1.4.0",
         "transformers >= 2.11.0",
     ],
     entry_points={"console_scripts": ["punctuate=punctuator.main:main",],},
