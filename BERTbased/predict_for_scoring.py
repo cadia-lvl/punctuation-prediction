@@ -13,9 +13,11 @@ logging.basicConfig(level=logging.WARNING)
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
-        description="""Use a BERT like transformer, fine tuned for punctuation prediction, to insert punctuations into the input text.\n
+        description="""Use a BERT like transformer, fine tuned for punctuation prediction, to insert punctuations into the input text.
+        This script does not convert the punctuation tokens to punctuations afterwards which is convenient when we intend to compare the
+        output to a processed ground truth for scoring. Punctuation tokens are removed from the input file before predicting.\n
         Usage: python predict.py <model-path> <input-file> <output-file>\n
-            E.g. python predict.py out/punctuation/electra input.txt output.txt
+            E.g. python predict_for_scoring.py out/punctuation/electra input.txt output.txt
         """
     )
     parser.add_argument(
@@ -136,11 +138,26 @@ def punctuate(input_text, model_path):
 def main():
     args = parse_arguments()
 
+    SPACE = "O"
+    PUNCTUATION_VOCABULARY = [SPACE, "COMMA", "PERIOD", "QUESTIONMARK"]
+    PUNCTUATION_MAPPING = {
+        "SEMICOLON": "PERIOD",
+        "COLON": "COMMA",
+        "EXCLAMATIONMARK": "PERIOD",
+        "DASH": "COMMA",
+    }
+
     with open(args.infile, "r") as f:
         # Clean the input file of non-printable characters and split on whitespace
-        text = strip_string(f.read().replace("\n", " ")).split()
+        raw_text = strip_string(f.read().replace("\n", " "))
+    # Remove the punctuations
+    text_wo_punct = [
+        s
+        for s in raw_text.split()
+        if s not in PUNCTUATION_VOCABULARY and s not in PUNCTUATION_MAPPING
+    ]
 
-    punctuated = punctuate(text, args.model_path)
+    punctuated = punctuate(text_wo_punct, args.model_path)
 
     with open(args.outfile, "w") as fout:
         fout.write(punctuated)
