@@ -1,7 +1,7 @@
 # README
 
 # Punctuation Prediction 
-A python package that punctuates Icelandic text. The input data is unpunctuated text and punctuated text is returned. The user can choose between three different punctuation models, an ELECTRA Transformer, a seq2seq Transformer and a bidirectional RNN ([Punctuator 2](www.github.com/ottokart/punctuator2)) in Tensorflow 2.
+A python package that punctuates Icelandic text. The input data is unpunctuated text and punctuated text is returned. The user can choose between two different punctuation models, an ELECTRA Transformer and a bidirectional RNN ([Punctuator 2](www.github.com/ottokart/punctuator2)) in Tensorflow 2. The transformer model shows better results for long well structured input, e.g. more formal text, while the biRNN is more robust against ASR errors and better with shorter input.
 
 # Table of Contents
 - [Installation](#installation)
@@ -57,7 +57,6 @@ Which of the three models to be used can be specified on the command line. The d
 |---|---|
 |biRNN|The Punctuator 2 model in Tensorflow.|
 |ELECTRA|The ELECTRA Transformer (HuggingFace)|
-|seq2seq|The seq2seq Transformer (Fairseq)|
 
 For a short help message of how to use the package, type `punctuate -h` or `punctuate --help`.
 
