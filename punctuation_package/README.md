@@ -21,13 +21,11 @@ To install, first create a conda environment:
 Then activate it:
 ```conda activate {venv}```
 
-Pip install the requirement(s):
-```pip install tensorflow==2.1.0```
-If pip, which the Tensorflow site recommends, for some reason doesn't work, you can try conda:
+Install the requirement(s):
 ```conda install tensorflow==2.1.0```
 
 The transformer models are created with PyTorch, which is needed when reading the models:
-```pip install torch```
+```conda install pytorch```
 
 To use the ELECTRA model one needs access to Hugging Face functions, installed with:
 
