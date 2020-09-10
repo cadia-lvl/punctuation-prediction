@@ -11,15 +11,18 @@ All we provide here for the transformers are 1) data preprocessing scripts, to g
 ## Requirements and Installation
 - Python version >= 3.6
 - An NVIDIA GPU and NCCL
-- For the Fairseq sequence to sequence model: PyTorch version >= 1.4.0
-- For HuggingFace's BERT based token classifier and Punctuator 2: TensorFlow 2.0
-- For HuggingFace's transformer: seqeval and fastprogress
+- For HuggingFace's BERT based token classifier and the Fairseq sequence to sequence model: PyTorch version >= 1.4.0
+- For Punctuator 2: TensorFlow 2.0
+- For HuggingFace's transformer: seqeval and fastprogress - Is installed with the requirements below
 
 Installation with the HuggingFace and Fairseq submodules:
 ~~~~
-pip install seqeval  
-pip install git+https://github.com/fastai/fastprogress.git  
 git clone --recurse-submodules https://github.com/cadia-lvl/punctuation-prediction
+cd transformers
+pip install .
+pip install -r ./examples/requirements.txt
+cd ../fairseq
+pip install --editable ./
 ~~~~
 
 ## Licence
