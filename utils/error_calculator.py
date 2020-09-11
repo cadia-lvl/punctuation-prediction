@@ -4,7 +4,6 @@ Computes and prints the overall classification error and precision, recall, F-sc
 
 __author__ = "Ottokar Tilk and Tanel Alumae. Adapted by Inga R. Helgadottir"
 
-import sys
 import os
 import codecs
 import argparse
@@ -46,8 +45,7 @@ def punctuations(transformer, icelandic):
     MAPPING = {}
 
     if transformer:
-        SPACE = "O"
-        PUNCTUATION_VOCABULARY = [SPACE, "COMMA", "PERIOD", "QUESTIONMARK"]
+        PUNCTUATION_VOCABULARY = ["COMMA", "PERIOD", "QUESTIONMARK"]
         if icelandic:
             # Mapping to comma fits better for Icelandic, but to period for English
             PUNCTUATION_MAPPING = {
@@ -80,12 +78,12 @@ def punctuations(transformer, icelandic):
                 "!EXCLAMATIONMARK": ".PERIOD",
                 "-DASH": ",COMMA",
             }
-    return SPACE, MAPPING, PUNCTUATION_MAPPING, PUNCTUATION_VOCABULARY
+    return MAPPING, PUNCTUATION_MAPPING, PUNCTUATION_VOCABULARY
 
 
 def compute_error(target_paths, predicted_paths, transformer, icelandic):
 
-    SPACE, MAPPING, PUNCTUATION_MAPPING, PUNCTUATION_VOCABULARY = punctuations(
+    MAPPING, PUNCTUATION_MAPPING, PUNCTUATION_VOCABULARY = punctuations(
         transformer, icelandic
     )
 
@@ -113,8 +111,20 @@ def compute_error(target_paths, predicted_paths, transformer, icelandic):
             predicted_path, "r", "utf-8"
         ) as predicted:
 
-            target_stream = target.read().split()
-            predicted_stream = predicted.read().split()
+            target_stream = (
+                target.read()
+                .replace(" O\n", " ")
+                .replace("\n", " ")
+                .replace(" '", "'")
+                .split()
+            )
+            predicted_stream = (
+                predicted.read()
+                .replace(" O\n", " ")
+                .replace("\n", " ")
+                .replace(" '", "'")
+                .split()
+            )
 
             while True:
 
@@ -202,7 +212,7 @@ def compute_error(target_paths, predicted_paths, transformer, icelandic):
 
     for p in PUNCTUATION_VOCABULARY:
 
-        if p == SPACE:
+        if p == "_SPACE":
             continue
 
         overall_tp += true_positives.get(p, 0.0)

@@ -117,7 +117,7 @@ def punctuate(input_text, model_path):
     labels = config.id2label
 
     # split up long lines to not exceed the training sequence length
-    n = 80
+    n = 60
     text_to_punctuate = []
     logging.info(f"input_text length: {len(input_text)}")
     if len(input_text) > n:

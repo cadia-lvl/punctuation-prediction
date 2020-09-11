@@ -96,7 +96,7 @@ def get_model(model_type):
     except:
         if os.path.exists(model_type):
             pass
-    base_url = "https://repository.clarin.is/repository/xmlui/bitstream/handle/20.500.12537/48/"
+    base_url = "https://repository.clarin.is/repository/xmlui/bitstream/handle/20.500.12537/49/"
     to_download = []
     if model_type == "biRNN":
         to_download.extend(
@@ -264,7 +264,7 @@ def punctuate_electra(input_text, model_type="ELECTRA", format="inline"):
 
     # split up long lines to not exceed the training sequence length
 
-    n = 80
+    n = 60
     text_to_punctuate = []
     if len(input_list) > n:
         line_part = [
@@ -274,7 +274,7 @@ def punctuate_electra(input_text, model_type="ELECTRA", format="inline"):
     elif len(input_list) == 0:
         pass
     else:
-        text_to_punctuate.extend(input_list)
+        text_to_punctuate.append(" ".join(input_list))
 
     punctuated_text = []
     for t in text_to_punctuate:

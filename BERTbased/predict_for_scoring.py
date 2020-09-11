@@ -105,7 +105,7 @@ def punctuate(input_text, model_path):
     labels = config.id2label
 
     # split up long lines to not exceed the training sequence length
-    n = 80
+    n = 60
     text_to_punctuate = []
     logging.info(f"input_text length: {len(input_text)}")
     if len(input_text) > n:
@@ -149,7 +149,9 @@ def main():
 
     with open(args.infile, "r") as f:
         # Clean the input file of non-printable characters and split on whitespace
-        raw_text = strip_string(f.read().replace("\n", " "))
+        raw_text = strip_string(
+            f.read().replace(" O\n", " ").replace("\n", " ").replace(" '", "'")
+        )
     # Remove the punctuations
     text_wo_punct = [
         s

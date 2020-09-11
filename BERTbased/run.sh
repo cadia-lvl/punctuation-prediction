@@ -59,7 +59,7 @@ if [ $stage -le -1 ]; then
     # 11. Add O to empty slots in the 2nd column
     for i in train dev test; do
         (
-            sed -re 's/[^A-ZÁÐÉÍÓÚÝÞÆÖa-záðéíóúýþæö0-9 .,:;\?\!$#@%&°\x27\/<>\-]/ /g' -e 's/ +/ /g' -e 's: ([\.,\?\!\:\;\-][A-Z]{4,}):\1:g' \
+            sed -re 's/[^A-ZÁÐÉÍÓÚÝÞÆÖa-záðéíóúýþæö0-9 .,:;\?\!$#@%&°\x27<>\-]/ /g' -e 's/ +/ /g' -e 's: ([\.,\?\!\:\;\-][A-Z]{4,}):\1:g' \
             < $orig/*.${i}.txt | tr ' ' '\n' \
             | sed -re 's:([\.,\?\!\:\;\-][A-Z]{4,}): \1:g' \
             -e 's:\;SEMICOLON|\-DASH|\:COLON:COMMA:g' \

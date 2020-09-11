@@ -1,7 +1,7 @@
 # README
 
 # Punctuation Prediction 
-A python package that punctuates Icelandic text. The input data is unpunctuated text and punctuated text is returned. The user can choose between three different punctuation models, an ELECTRA Transformer, a seq2seq Transformer and a bidirectional RNN ([Punctuator 2](www.github.com/ottokart/punctuator2)) in Tensorflow 2.
+A python package that punctuates Icelandic text. The input data is unpunctuated text and punctuated text is returned. The user can choose between two punctuation models, an ELECTRA Transformer and a bidirectional RNN ([Punctuator 2](www.github.com/ottokart/punctuator2)) in Tensorflow 2.
 
 # Table of Contents
 - [Installation](#installation)
@@ -21,13 +21,11 @@ To install, first create a conda environment:
 Then activate it:
 ```conda activate {venv}```
 
-Pip install the requirement(s):
-```pip install tensorflow==2.1.0```
-If pip, which the Tensorflow site recommends, for some reason doesn't work, you can try conda:
+Install the requirement(s):
 ```conda install tensorflow==2.1.0```
 
 The transformer models are created with PyTorch, which is needed when reading the models:
-```pip install torch```
+```conda install pytorch```
 
 To use the ELECTRA model one needs access to Hugging Face functions, installed with:
 
@@ -35,7 +33,7 @@ To use the ELECTRA model one needs access to Hugging Face functions, installed w
 
 Then finally, run:
 
-```pip install punctuator-ice```
+```pip install punctuator-isl```
 
 # Running
 
@@ -59,7 +57,6 @@ Which of the three models to be used can be specified on the command line. The d
 |---|---|
 |biRNN|The Punctuator 2 model in Tensorflow.|
 |ELECTRA|The ELECTRA Transformer (HuggingFace)|
-|seq2seq|The seq2seq Transformer (Fairseq)|
 
 For a short help message of how to use the package, type `punctuate -h` or `punctuate --help`.
 
