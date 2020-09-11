@@ -1,7 +1,7 @@
 # README
 
 # Punctuation Prediction 
-A python package that punctuates Icelandic text. The input data is unpunctuated text and punctuated text is returned. The user can choose between two punctuation models, an ELECTRA Transformer and a bidirectional RNN ([Punctuator 2](www.github.com/ottokart/punctuator2)) in Tensorflow 2.
+A python package that punctuates Icelandic text. The input data is unpunctuated text and punctuated text is returned. The user can choose between two punctuation models, a bidirectional RNN ([Punctuator 2](www.github.com/ottokart/punctuator2)) in Tensorflow 2, and a pretrained ELECTRA Transformer, fine-tuned for punctuation prediction, [based on a Hugging Face NER recipe](https://github.com/huggingface/transformers/tree/master/examples/token-classification). The pretrained ELECTRA model was trained by Jón Friðrik Daðason on data from the Icelandic Gigaword corpus. Both punctuation models are trained/fine-tuned using Gigaword corpus data.
 
 # Table of Contents
 - [Installation](#installation)
