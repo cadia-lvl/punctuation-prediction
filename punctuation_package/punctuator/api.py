@@ -96,12 +96,13 @@ def get_model(model_type):
     except:
         if os.path.exists(model_type):
             pass
-    base_url = "https://repository.clarin.is/repository/xmlui/bitstream/handle/20.500.12537/49/"
+    base_url = "https://repository.clarin.is/repository/xmlui/bitstream/item/70
+    https://repository.clarin.is/repository/xmlui/bitstream/item/70/vocabulary?sequence=6&isAllowed=y
     to_download = []
     if model_type == "biRNN":
         to_download.extend(
             [
-                (f"{base_url}isl-model.pcl", model_type + "/model.pcl"),
+                (f"{base_url}isl-model.pcl", model_type + "/Model_tf2_isl_big_1009_h256_lr0.02.pcl"),
                 (f"{base_url}vocabulary", model_type + "/vocabulary"),
                 (f"{base_url}punctuations", model_type + "/punctuations"),
             ]
