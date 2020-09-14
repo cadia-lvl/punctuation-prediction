@@ -96,7 +96,7 @@ def get_model(model_type):
     except:
         if os.path.exists(model_type):
             pass
-    base_url = "https://repository.clarin.is/repository/xmlui/bitstream/handle/20.500.12537/49/"
+    base_url = "https://repository.clarin.is/repository/xmlui/bitstream/item/70/"
     to_download = []
     if model_type == "biRNN":
         to_download.extend(
