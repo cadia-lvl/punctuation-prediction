@@ -96,7 +96,7 @@ def get_model(model_type):
     except:
         if os.path.exists(model_type):
             pass
-    base_url = "https://repository.clarin.is/repository/xmlui/bitstream/item/70"
+    base_url = "https://repository.clarin.is/repository/xmlui/bitstream/handle/20.500.12537/52"
     to_download = []
     if model_type == "biRNN":
         to_download.extend(
@@ -199,7 +199,7 @@ def punctuate_text(
 def punctuate_biRNN(input_text, model_type="biRNN", format="inline"):
     """Punctuate the input text with the Punctuator 2 model. Capitalize sentence beginnings."""
     get_model(model_type)
-    model_file = model_type + "/model.pcl"
+    model_file = model_type + "/Model_tf2_isl_big_1009_h256_lr0.02.pcl"
     vocab_len = len(read_vocabulary(WORD_VOCAB_FILE))
     x_len = (
         vocab_len
