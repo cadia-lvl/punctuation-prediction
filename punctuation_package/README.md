@@ -23,6 +23,7 @@ Then activate it:
 
 Install the requirement(s):
 ```conda install tensorflow==2.1.0```
+```pip install tensorflow==2.1.0```could also work, if you run into problems.
 
 The transformer models are created with PyTorch, which is needed when reading the models:
 ```conda install pytorch```
