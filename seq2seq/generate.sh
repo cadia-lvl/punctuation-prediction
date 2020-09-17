@@ -12,8 +12,6 @@ datadir=./data/processed/${input}/seq2seq
 bindatadir=./data-bin/${input}$ext.tokenized.nopuncts-${casing}puncts
 modeldir=./out/seq2seq-out/${input}$ext/checkpoints
 
-conda activate ptenv
-
 # Evaluate our trained model
 srun --mem 8G --time 0-12:00 \
 fairseq-generate $bindatadir \
@@ -29,22 +27,8 @@ egrep "^T-" $modeldir/test.out | cut -f2- > $modeldir/target.txt
 wdiff -3 <(sed -r 's:PERIOD|COMMA|QUESTIONMARK::g' $modeldir/target.txt) \
 <(sed -r 's:PERIOD|COMMA|QUESTIONMARK::g' $modeldir/test_predictions.txt) |egrep -v '=|^$' |wc -l
 
-sed -e 's:COMMA:,COMMA:g' \
--e 's:QUESTIONMARK:\?QUESTIONMARK:g' \
--e 's:PERIOD:.PERIOD:g'\
-< $modeldir/target.txt \
-| tr '\n' ' ' | sed -r 's: +: :g' \
-> $modeldir/target_punct2_style.txt
-
-sed -e 's:COMMA:,COMMA:g' \
--e 's:QUESTIONMARK:\?QUESTIONMARK:g' \
--e 's:PERIOD:.PERIOD:g'\
-< $modeldir/test_predictions.txt \
-| tr '\n' ' ' | sed -r 's: +: :g' \
-> $modeldir/test_predictions_punct2_style.txt
-
-python utils/error_calculator.py \
-$modeldir/target_punct2_style.txt $modeldir/test_predictions_punct2_style.txt \
+python utils/error_calculator.py --transformer \
+$modeldir/target.txt $modeldir/test_predictions.txt \
 > $modeldir/test_error.txt
 
 if [ $do_wer_tests = "true" ]; then

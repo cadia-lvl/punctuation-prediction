@@ -16,7 +16,7 @@ def parse_arguments():
         description="""Use a BERT like transformer, fine tuned for punctuation prediction, to insert punctuations into the input text.
         This script does not convert the punctuation tokens to punctuations afterwards which is convenient when we intend to compare the
         output to a processed ground truth for scoring. Punctuation tokens are removed from the input file before predicting.\n
-        Usage: python predict.py <model-path> <input-file> <output-file>\n
+        Usage: python predict.py <PyTorch-model-path> <input-file> <output-file>\n
             E.g. python predict_for_scoring.py out/punctuation/electra input.txt output.txt
         """
     )

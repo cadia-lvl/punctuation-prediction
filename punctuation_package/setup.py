@@ -4,8 +4,8 @@ with open("README.md", "r") as readme:
     long_description = readme.read()
 
 setuptools.setup(
-    name="punctuator-lvl9-inga",
-    version="1.1.23",
+    name="punctuator-isl",
+    version="1.1.0",
     author="Helga Svala Sigurðardóttir",
     author_email="helgas@ru.is",
     url="https://github.com/cadia-lvl/punctuation-prediction/tree/master/punctuation_package",
