@@ -55,3 +55,9 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# Misc
+.vscode
+auxiliary/
+wandb/
+runs/
