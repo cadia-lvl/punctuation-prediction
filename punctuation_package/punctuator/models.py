@@ -7,6 +7,12 @@ import tensorflow as tf
 from tensorflow.keras import layers
 import numpy as np
 
+# d = os.path.dirname(__file__)  # directory of script
+# filename = f"{d}/path_config.json"
+# with open(filename, "r") as json_file:
+#     conf = json.load(json_file)
+#     download_dir = conf["download_dir"]
+
 tf.get_logger().setLevel("INFO")
 
 END = "</S>"
@@ -20,10 +26,14 @@ MAX_SEQUENCE_LEN = 200
 
 MINIBATCH_SIZE = 16
 
-WORD_VOCAB_FILE = "biRNN/vocabulary"
-PUNCT_VOCAB_FILE = "biRNN/punctuations"
-
 EOS_TOKENS = {".PERIOD", "?QUESTIONMARK", "!EXCLAMATIONMARK"}
+
+
+def download_dir_path(file_path):
+    path = os.path.dirname(file_path)
+    word_vocab_file = f"{path}/vocabulary"
+    punct_vocab_file = f"{path}/punctuations"
+    return word_vocab_file, punct_vocab_file
 
 
 def iterable_to_dict(arr):
@@ -63,10 +73,12 @@ def load(file_path, x, p=None):
     with open(file_path, "rb") as f:
         state = pickle.load(f)
 
+    download_dir_path(file_path)
+
     rng = np.random
     rng.set_state(state["random_state"])
 
-    net = GRU(rng=rng, x=x, n_hidden=state["n_hidden"])
+    net = GRU(rng=rng, x=x, n_hidden=state["n_hidden"], file_path=file_path)
 
     for net_param, state_param in zip(net.params, state["params"]):
         net_param.assign(state_param)
@@ -120,14 +132,16 @@ class GRUCell(layers.Layer):
 
 
 class GRU(tf.keras.Model):
-    def __init__(self, rng, x, n_hidden):
+    def __init__(self, rng, x, n_hidden, file_path):
         super(GRU, self).__init__()
+
+        self.word_vocab_file, self.punct_vocab_file = download_dir_path(file_path)
 
         self.minibatch_size = tf.shape(x)[1]
 
         self.n_hidden = n_hidden
-        self.x_vocabulary = read_vocabulary(WORD_VOCAB_FILE)
-        self.y_vocabulary = read_vocabulary(PUNCT_VOCAB_FILE)
+        self.x_vocabulary = read_vocabulary(self.word_vocab_file)
+        self.y_vocabulary = read_vocabulary(self.punct_vocab_file)
 
         self.x_vocabulary_size = len(self.x_vocabulary)
         self.y_vocabulary_size = len(self.y_vocabulary)

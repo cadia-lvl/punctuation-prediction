@@ -2,20 +2,19 @@ import os
 import sys
 import logging
 import unicodedata
+from pathlib import Path
 
 import numpy as np
 import tensorflow as tf
 import requests
 from transformers import AutoConfig, ElectraTokenizer, ElectraForTokenClassification
 
-from .models import (
+from models import (
     SPACE,
     EOS_TOKENS,
     MAX_SEQUENCE_LEN,
     UNK,
     END,
-    WORD_VOCAB_FILE,
-    PUNCT_VOCAB_FILE,
     MAX_WORD_VOCABULARY_SIZE,
     MIN_WORD_COUNT_IN_VOCAB,
     MINIBATCH_SIZE,
@@ -74,6 +73,10 @@ def capitalize_after_eos_token(token):
         return token
 
 
+def upcase_first_letter(s):
+    return s[0].upper() + s[1:]
+
+
 def download_file(url, path_to_save):
     response = requests.get(url)
     if os.path.isfile(path_to_save):
@@ -84,18 +87,19 @@ def download_file(url, path_to_save):
         logging.info(f"Downloaded={path_to_save}")
 
 
-def upcase_first_letter(s):
-    return s[0].upper() + s[1:]
-
-
-def get_model(model_type):
+def get_model(model_type, download_dir):
     """Get the model files from CLARIN"""
+
+    model_dir = f"{download_dir}/{model_type}"
     try:
-        os.mkdir(model_type)
-        print(f"Created {model_type}-folder")
-    except:
-        if os.path.exists(model_type):
-            pass
+        Path(model_dir).mkdir(parents=True, exist_ok=True)
+
+        print(f"Created the model directory: {model_dir}")
+    except OSError:
+        sys.exit(
+            f"Fatal: The directory {model_dir} does not exist and cannot be created."
+        )
+
     base_url = "https://repository.clarin.is/repository/xmlui/bitstream/handle/20.500.12537/52/"
     to_download = []
     if model_type == "biRNN":
@@ -103,25 +107,25 @@ def get_model(model_type):
             [
                 (
                     f"{base_url}Model_tf2_isl_big_1009_h256_lr0.02.pcl",
-                    model_type + "/model.pcl",
+                    f"{model_dir}/model.pcl",
                 ),
-                (f"{base_url}vocabulary", model_type + "/vocabulary"),
-                (f"{base_url}punctuations", model_type + "/punctuations"),
+                (f"{base_url}vocabulary", f"{model_dir}/vocabulary"),
+                (f"{base_url}punctuations", f"{model_dir}/punctuations",),
             ]
         )
     elif model_type == "ELECTRA":
         to_download.extend(
             [
-                (f"{base_url}pytorch_model.bin", model_type + "/pytorch_model.bin"),
-                (f"{base_url}vocab.txt", model_type + "/vocab.txt"),
-                (f"{base_url}config.json", model_type + "/config.json"),
+                (f"{base_url}pytorch_model.bin", f"{model_dir}/pytorch_model.bin",),
+                (f"{base_url}vocab.txt", f"{model_dir}/vocab.txt"),
+                (f"{base_url}config.json", f"{model_dir}/config.json"),
                 (
                     f"{base_url}tokenizer_config.json",
-                    model_type + "/tokenizer_config.json",
+                    f"{model_dir}/tokenizer_config.json",
                 ),
                 (
                     f"{base_url}special_tokens_map.json",
-                    model_type + "/special_tokens_map.json",
+                    f"{model_dir}/special_tokens_map.json",
                 ),
             ]
         )
@@ -199,11 +203,12 @@ def punctuate_text(
     return output_list
 
 
-def punctuate_biRNN(input_text, model_type="biRNN", format="inline"):
+def punctuate_biRNN(input_text, download_dir, model_type="biRNN", format="inline"):
     """Punctuate the input text with the Punctuator 2 model. Capitalize sentence beginnings."""
-    get_model(model_type)
-    model_file = model_type + "/model.pcl"
-    vocab_len = len(read_vocabulary(WORD_VOCAB_FILE))
+    get_model(model_type, download_dir)
+    model_file = f"{download_dir}/{model_type}/model.pcl"
+    vocab_file = f"{download_dir}/{model_type}/vocabulary"
+    vocab_len = len(read_vocabulary(vocab_file))
     x_len = (
         vocab_len
         if vocab_len < MAX_WORD_VOCABULARY_SIZE
@@ -239,14 +244,15 @@ def punctuate_biRNN(input_text, model_type="biRNN", format="inline"):
     return punctuated_text
 
 
-def punctuate_electra(input_text, model_type="ELECTRA", format="inline"):
+def punctuate_electra(input_text, download_dir, model_type="ELECTRA", format="inline"):
     """Punctuate the input text with the ELECTRA model. Capitalize sentence beginnings."""
-    get_model(model_type)
+    get_model(model_type, download_dir)
 
-    config = AutoConfig.from_pretrained(model_type)
-    tokenizer = ElectraTokenizer.from_pretrained(model_type)
+    model_path = f"{download_dir}/{model_type}"
+    config = AutoConfig.from_pretrained(model_path)
+    tokenizer = ElectraTokenizer.from_pretrained(model_path)
     tokenizer.add_tokens(["<NUM>"])
-    pytorch_model = ElectraForTokenClassification.from_pretrained(model_type)
+    pytorch_model = ElectraForTokenClassification.from_pretrained(model_path)
     pytorch_model.resize_token_embeddings(len(tokenizer))
 
     punctuation_dict = {
@@ -321,13 +327,22 @@ def iterate(tokens, predictions, eos_punct, punctuation_dict):
     return " ".join(text_pred)
 
 
-def punctuate(input_path, model_type="biRNN", format="inline"):
+def punctuate(input_path, download_dir, model_type="biRNN", format="inline"):
     """Punctuate the input text"""
+
+    # d = os.path.dirname(__file__)  # directory of script
+    # filename = f"{d}/path_config.json"
+    # with open(filename, "r") as json_file:
+    #     conf = json.load(json_file)
+    #     download_dir = conf["download_dir"]
+
     if model_type.lower() == "electra":
         punctuated_text = punctuate_electra(
-            input_path, model_type="ELECTRA", format=format
+            input_path, download_dir, model_type="ELECTRA", format=format
         )
     else:
-        punctuated_text = punctuate_biRNN(input_path, model_type="biRNN", format=format)
+        punctuated_text = punctuate_biRNN(
+            input_path, download_dir, model_type="biRNN", format=format
+        )
 
     return punctuated_text
