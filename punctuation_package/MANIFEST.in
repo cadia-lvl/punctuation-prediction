@@ -1,3 +1,3 @@
-include path_config.json
-include example_input.txt
-include LICENSE
+include punctuator/path_config.json
+include punctuator/example_input.txt
+include punctuator/LICENSE
