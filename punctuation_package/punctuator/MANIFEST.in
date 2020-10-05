@@ -1,0 +1,3 @@
+include path_config.json
+include example_input.txt
+include LICENSE
