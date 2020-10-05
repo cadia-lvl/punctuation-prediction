@@ -3,13 +3,14 @@ import sys
 import logging
 import unicodedata
 from pathlib import Path
+import json
 
 import numpy as np
 import tensorflow as tf
 import requests
 from transformers import AutoConfig, ElectraTokenizer, ElectraForTokenClassification
 
-from models import (
+from .models import (
     SPACE,
     EOS_TOKENS,
     MAX_SEQUENCE_LEN,
@@ -77,6 +78,37 @@ def upcase_first_letter(s):
     return s[0].upper() + s[1:]
 
 
+# Copy from nltk's downloader.py
+def default_download_dir() -> str:
+    # On Windows, use %APPDATA%
+    if sys.platform == "win32" and "APPDATA" in os.environ:
+        homedir = os.environ["APPDATA"]
+
+    # Otherwise, install in the user's home directory.
+    else:
+        homedir = os.path.expanduser("~/")
+        if homedir == "~/":
+            raise ValueError("Could not find a default download directory")
+
+    # append "punctuation_models" to the home directory
+    return os.path.join(homedir, "punctuation_models")
+
+
+def read_config_path():
+    """Reads the path defined in path_config.json.
+    Returns default path if null."""
+    d = os.path.dirname(__file__)  # directory of script
+    filename = f"{d}/path_config.json"
+
+    with open(filename, "r") as config_file:
+        config = json.load(config_file)
+
+    if config["model_directory"] != "":
+        return config["model_directory"]
+
+    return default_download_dir()
+
+
 def download_file(url, path_to_save):
     response = requests.get(url)
     if os.path.isfile(path_to_save):
@@ -92,9 +124,9 @@ def get_model(model_type, download_dir):
 
     model_dir = f"{download_dir}/{model_type}"
     try:
-        Path(model_dir).mkdir(parents=True, exist_ok=True)
-
-        print(f"Created the model directory: {model_dir}")
+        if not os.path.exists(model_dir):
+            Path(model_dir).mkdir(parents=True, exist_ok=True)
+            print(f"Created the model directory: {model_dir}")
     except OSError:
         sys.exit(
             f"Fatal: The directory {model_dir} does not exist and cannot be created."
@@ -327,14 +359,10 @@ def iterate(tokens, predictions, eos_punct, punctuation_dict):
     return " ".join(text_pred)
 
 
-def punctuate(input_path, download_dir, model_type="biRNN", format="inline"):
+def punctuate(input_path, model_type="biRNN", format="inline"):
     """Punctuate the input text"""
 
-    # d = os.path.dirname(__file__)  # directory of script
-    # filename = f"{d}/path_config.json"
-    # with open(filename, "r") as json_file:
-    #     conf = json.load(json_file)
-    #     download_dir = conf["download_dir"]
+    download_dir = read_config_path()
 
     if model_type.lower() == "electra":
         punctuated_text = punctuate_electra(

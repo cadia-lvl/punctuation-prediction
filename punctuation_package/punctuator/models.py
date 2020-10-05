@@ -7,12 +7,6 @@ import tensorflow as tf
 from tensorflow.keras import layers
 import numpy as np
 
-# d = os.path.dirname(__file__)  # directory of script
-# filename = f"{d}/path_config.json"
-# with open(filename, "r") as json_file:
-#     conf = json.load(json_file)
-#     download_dir = conf["download_dir"]
-
 tf.get_logger().setLevel("INFO")
 
 END = "</S>"
