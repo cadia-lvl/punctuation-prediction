@@ -5,7 +5,7 @@ with open("README.md", "r") as readme:
 
 setuptools.setup(
     name="punctuator-lvl9-inga",
-    version="1.1.28",
+    version="1.1.29",
     author="Helga Svala Sigurðardóttir",
     author_email="helgas@ru.is",
     url="https://github.com/cadia-lvl/punctuation-prediction/tree/master/punctuation_package",
