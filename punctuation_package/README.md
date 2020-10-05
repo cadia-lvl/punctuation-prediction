@@ -52,7 +52,7 @@ The input uses `stdin` and the output `stdout`. Both files are encoded in UTF-8.
 
 Empty lines in the input are treated as sentence boundaries. 
 
-Which of the three models to be used can be specified on the command line. The default is `biRNN`.
+Which of the two models to be used can be specified on the command line. The default is `biRNN`.
 
 |Model|Description|
 |---|---|
@@ -62,6 +62,10 @@ Which of the three models to be used can be specified on the command line. The d
 For a short help message of how to use the package, type `punctuate -h` or `punctuate --help`.
 
 The input text should be like directly from automatic speech recognition, without capitalizations or punctuations. 
+
+The first time the program is run the punctuation models are downloaded into `punctuation_models`, in the user 
+home directory for Linux and Mac users, and in APPDATA for Windows users. The user can put a new model path in 
+`path_config.json` inside the punctuator directory is another location is desired.
 
 ## Example
 
