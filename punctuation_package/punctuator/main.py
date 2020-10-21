@@ -2,6 +2,7 @@ import os
 import sys
 import argparse
 import json
+from .api import punctuate
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
@@ -48,9 +49,7 @@ def main():
     else:
         model_type = "biRNN"
 
-    from .api import punctuate
-
-    output_path.write(punctuate(input_path, model_type, format="file"))
+        output_path.write(punctuate(input_path, model_type, format="file"))
 
 
 if __name__ == "__main__":
