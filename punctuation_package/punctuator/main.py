@@ -49,7 +49,7 @@ def main():
     else:
         model_type = "biRNN"
 
-        output_path.write(punctuate(input_path, model_type, format="file"))
+    output_path.write(punctuate(input_path, model_type, format="file"))
 
 
 if __name__ == "__main__":
