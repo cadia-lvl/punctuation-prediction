@@ -33,18 +33,6 @@ pip install .
 
 The models for punctuation prediction are downloaded automatically with the pip package (you can get more information about the package in the folder `punctuation_package`). Note that they are trained on **Icelandic** data. They are also directly accessible on the [Clarin webpage](https://repository.clarin.is/repository/xmlui/handle/20.500.12537/52).
 
-### Punctuator TF2 files:
-[Model](https://repository.clarin.is/repository/xmlui/bitstream/handle/20.500.12537/52/Model_tf2_isl_big_1009_h256_lr0.02.pcl)  
-[Vocabulary](https://repository.clarin.is/repository/xmlui/bitstream/handle/20.500.12537/52/vocabulary)  
-[Punctuation List](https://repository.clarin.is/repository/xmlui/bitstream/handle/20.500.12537/52/punctuations)  
-
-### Transformer ELECTRA files:
-[Model](https://repository.clarin.is/repository/xmlui/bitstream/handle/20.500.12537/52/pytorch_model.bin)  
-[Vocabulary](https://repository.clarin.is/repository/xmlui/bitstream/handle/20.500.12537/52/vocab.txt)  
-[Configuration File](https://repository.clarin.is/repository/xmlui/bitstream/handle/20.500.12537/52/config.json)  
-[Tokenizer Configuration File](https://repository.clarin.is/repository/xmlui/bitstream/handle/20.500.12537/52/tokenizer_config.json)  
-[Special Tokens Map](https://repository.clarin.is/repository/xmlui/bitstream/handle/20.500.12537/52/special_tokens_map.json)  
-
 ## Licence
 MIT License
 
