@@ -31,7 +31,7 @@ pip install .
 
 ## Models
 
-The models for punctuation prediction are downloaded automatically with the pip package (you can get more information about the package in the folder `punctuation_package`). Note that they are trained on **Icelandic** data. They are also directly accessible here:
+The models for punctuation prediction are downloaded automatically with the pip package (you can get more information about the package in the folder `punctuation_package`). Note that they are trained on **Icelandic** data. They are also directly accessible on the [Clarin webpage](https://repository.clarin.is/repository/xmlui/handle/20.500.12537/52).
 
 ### Punctuator TF2 files:
 [Model](https://repository.clarin.is/repository/xmlui/bitstream/handle/20.500.12537/52/Model_tf2_isl_big_1009_h256_lr0.02.pcl)  
