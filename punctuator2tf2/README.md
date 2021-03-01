@@ -26,7 +26,7 @@ It's good to put hidden_layer_size = 256 and learning_rate = 0.02.
 
 To punctuate the data, using the trained model, the command is:
 
-``` cat <data>.test.txt | python punctuator.py <model_path> <model_output_path> ```
+``` python punctuator.py <model_path> <data>.test.txt <model_output_path> ```
 
 `<data>.test.txt` is the file in the data folder which contains a portion of the data in the format:
 
