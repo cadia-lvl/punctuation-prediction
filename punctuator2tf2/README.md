@@ -46,7 +46,7 @@ That is, the punctuated version of <data>.dev.txt the model predicts.
 
 To calculate the precision, recall and F1-score, the output file that your model generated reaches, type:
 
-`python error_calculator.py <data>.dev.txt <model_output_path>`
+`python error_calculator.py <data>.test.txt <model_output_path>`
 
 ## Play with model
 
