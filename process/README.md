@@ -34,6 +34,6 @@ python introduce_wer.py {processed_text} {word error rate directory} {word error
 ```
 The function splits the WER to 25% insertions, 25% deletions and 50% substitutions.
 
-The file in the `wer`-directory can be used as a `.dev`-file in punctuator 2, to run `error_calculator.py` against a pretrained model.
+The file in the `wer`-directory can be used as a `.test`-file in punctuator 2, to run `error_calculator.py` against a pretrained model.
 
 
